@@ -25,4 +25,3 @@ export class AuthController {
     // TODO
     // перенести confirm-code.controller сюда, чтобы запросы были на /auth/email, а не /confirmCode/email и тд
 }
-
