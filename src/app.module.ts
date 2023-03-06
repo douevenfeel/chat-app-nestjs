@@ -1,16 +1,18 @@
-import {Module} from "@nestjs/common";
-import {SequelizeModule} from "@nestjs/sequelize";
+import { Module } from '@nestjs/common';
+import { SequelizeModule } from '@nestjs/sequelize';
 import { UsersModule } from './users/users.module';
-import {ConfigModule} from "@nestjs/config";
-import {User} from "./users/users.model";
+import { ConfigModule } from '@nestjs/config';
+import { User } from './users/users.model';
 import { AuthModule } from './auth/auth.module';
+import { ConfirmCodeModule } from './confirm-code/confirm-code.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
     controllers: [],
     providers: [],
     imports: [
         ConfigModule.forRoot({
-           envFilePath: `.${process.env.NODE_ENV}.env`
+            envFilePath: `.${process.env.NODE_ENV}.env`,
         }),
         SequelizeModule.forRoot({
             dialect: 'postgres',
@@ -20,10 +22,13 @@ import { AuthModule } from './auth/auth.module';
             password: process.env.POSTGRESS_PASSWORD,
             database: process.env.POSTGRES_DB,
             models: [User],
-            autoLoadModels: true
+            autoLoadModels: true,
         }),
         UsersModule,
         AuthModule,
-    ]
+        ConfirmCodeModule,
+        EmailModule,
+    ],
 })
 export class AppModule {}
+
