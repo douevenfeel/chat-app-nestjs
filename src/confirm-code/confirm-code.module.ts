@@ -10,8 +10,12 @@ import { UsersModule } from 'src/users/users.module';
 @Module({
     providers: [ConfirmCodeService],
     controllers: [ConfirmCodeController],
-    imports: [SequelizeModule.forFeature([ConfirmCode]), SequelizeModule.forFeature([User]), EmailModule, UsersModule],
+    imports: [
+        SequelizeModule.forFeature([ConfirmCode]),
+        SequelizeModule.forFeature([User]),
+        EmailModule,
+        UsersModule,
+    ],
     exports: [ConfirmCodeService],
 })
 export class ConfirmCodeModule {}
-

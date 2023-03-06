@@ -8,4 +8,3 @@ export class ValidationException extends HttpException {
         this.messages = response;
     }
 }
-

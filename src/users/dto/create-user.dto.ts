@@ -20,4 +20,3 @@ export class CreateUserDto {
     @IsString({ message: 'Должно быть строкой' })
     readonly lastName: string;
 }
-

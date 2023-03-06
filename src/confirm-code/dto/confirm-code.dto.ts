@@ -11,4 +11,3 @@ export class ConfirmCodeDto {
     @IsString({ message: 'Должно быть строкой' })
     readonly confirmCode: string;
 }
-

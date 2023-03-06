@@ -22,4 +22,3 @@ export class UsersController {
         return this.usersService.getUserByEmail(email);
     }
 }
-

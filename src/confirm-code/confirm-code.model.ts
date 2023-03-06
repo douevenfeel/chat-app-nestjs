@@ -29,4 +29,3 @@ export class ConfirmCode extends Model<ConfirmCode, ConfirmCodeCreationAttrs> {
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
     confirmed: boolean;
 }
-

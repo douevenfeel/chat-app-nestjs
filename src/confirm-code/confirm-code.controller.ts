@@ -20,4 +20,3 @@ export class ConfirmCodeController {
         return this.confirmCodeService.confirm(confirmCodeDto);
     }
 }
-

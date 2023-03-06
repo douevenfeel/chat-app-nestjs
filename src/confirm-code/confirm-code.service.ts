@@ -11,7 +11,8 @@ import { CreateConfirmCodeDto } from './dto/create-confirm-code.dto';
 @Injectable()
 export class ConfirmCodeService {
     constructor(
-        @InjectModel(ConfirmCode) private confirmCodeRepository: typeof ConfirmCode,
+        @InjectModel(ConfirmCode)
+        private confirmCodeRepository: typeof ConfirmCode,
         private emailService: EmailService,
         private userService: UsersService
     ) {}
@@ -67,4 +68,3 @@ export class ConfirmCodeService {
         return confirmCode;
     }
 }
-

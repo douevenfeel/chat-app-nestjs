@@ -1,7 +1,16 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
 import { ApiProperty } from '@nestjs/swagger';
 
-export type Avatar = 'green' | 'teal' | 'blue' | 'indigo' | 'purple' | 'pink' | 'red' | 'orange' | 'yellow';
+export type Avatar =
+    | 'green'
+    | 'teal'
+    | 'blue'
+    | 'indigo'
+    | 'purple'
+    | 'pink'
+    | 'red'
+    | 'orange'
+    | 'yellow';
 
 interface UserCreationAttrs {
     email: string;
@@ -40,4 +49,3 @@ export class User extends Model<User, UserCreationAttrs> {
     @Column({ type: DataType.STRING })
     avatar: string;
 }
-
