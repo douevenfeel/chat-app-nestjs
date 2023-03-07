@@ -31,13 +31,17 @@ export class AuthService {
                 HttpStatus.BAD_REQUEST
             );
         }
-        // TODO добавить проверку кода подтверждения, что он подтвержден - поле confirmed
+
+        // TODO добавить проверку кода подтверждения, что он подтвержден - поле confirmed для этого в confirmCodeService getConfirmCodeByEmail
+        // const { confirmed } = ...
         // если false - ошибка, true - дальше и удалить из бд
+
         const hashPassword = await bcrypt.hash(userDto.password, 5);
         const user = await this.userService.createUser({
             ...userDto,
             password: hashPassword,
         });
+        // TODO отправка письма о регистрации, метод создан в emailService sendUserRegistration, туда прокидывать userDto
         return this.generateToken(user);
     }
 

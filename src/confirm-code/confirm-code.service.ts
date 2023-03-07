@@ -26,10 +26,9 @@ export class ConfirmCodeService {
             return 'error';
         }
 
-        const alreadyCreated = this.getConfirmCodeByEmail(email);
+        const alreadyCreated = await this.getConfirmCodeByEmail(email);
         if (alreadyCreated) {
-            // TODO перезаписать код для этой почты
-            return 'already';
+            alreadyCreated.confirmCode = confirmCode;
         } else {
             await this.confirmCodeRepository.create({ email, confirmCode });
         }
@@ -40,12 +39,20 @@ export class ConfirmCodeService {
 
     async confirm(dto: ConfirmCodeDto) {
         const { email, confirmCode } = dto;
-        const candidate = await this.getConfirmCode(email, confirmCode);
+        // TODO добавить такую же проверку в registration, если за время регистрации уже появился пользователь с таким email - ошибка
+        const candidateEmail = await this.userService.getUserByEmail(email);
+        if (candidateEmail) {
+            // TODO прокинуть ошибку пользователь зарегистрирован уже
+        }
 
-        // TODO если за время подтверждения почта стала занята и пользователь теперь зареган, прокидывать ошибку пользователь уже зарегистрирован
+        const candidate = await this.getConfirmCode(email, confirmCode);
+        if (candidate) {
+            candidate.confirmed = true;
+            candidate.save();
+        }
 
         if (!candidate) {
-            // TODO ошибку прокинуть неверный код
+            // TODO ошибку прокинуть bad request неверный код
             return 'error';
         }
 

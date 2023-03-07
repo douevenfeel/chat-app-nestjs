@@ -10,12 +10,12 @@ import { CreateConfirmCodeDto } from './dto/create-confirm-code.dto';
 export class ConfirmCodeController {
     constructor(private confirmCodeService: ConfirmCodeService) {}
 
-    @Post('/email')
+    @Post('/confirm/email')
     email(@Body() confirmCodeDto: CreateConfirmCodeDto) {
         return this.confirmCodeService.generateCode(confirmCodeDto);
     }
 
-    @Post('/confirm')
+    @Post('/confirm/code')
     confirm(@Body() confirmCodeDto: ConfirmCodeDto) {
         return this.confirmCodeService.confirm(confirmCodeDto);
     }
