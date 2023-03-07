@@ -17,8 +17,8 @@ export class UsersController {
 
     @ApiOperation({ summary: 'Найти пользователя по id' })
     @ApiResponse({ status: 200, type: User })
-    @Get('/:id')
-    getById(@Param('id') id) {
+    @Get(':id')
+    getById(@Param('id') id: string) {
         return this.usersService.getUserById(id);
     }
 }

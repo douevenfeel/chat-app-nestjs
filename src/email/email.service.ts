@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { User } from 'src/users/users.model';
+import { RegistrationUserDto } from 'src/auth/dto/registration-user.dto';
 
 @Injectable()
 export class EmailService {
@@ -17,7 +18,7 @@ export class EmailService {
         });
     }
 
-    async sendUserRegistration(user: User, confirmCode: string) {
+    async sendUserRegistration(user: RegistrationUserDto) {
         await this.mailerService.sendMail({
             to: user.email,
             subject: 'Welcome to VK!',

@@ -2,7 +2,7 @@ import { UsersService } from './../users/users.service';
 import { EmailService } from './../email/email.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfirmCodeDto } from './dto/confirm-code.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { ConfirmCode } from './confirm-code.model';
 import { User } from 'src/users/users.model';
@@ -22,8 +22,10 @@ export class ConfirmCodeService {
         const confirmCode = uuidv4().slice(0, 6);
         const candidate = await this.userService.getUserByEmail(email);
         if (candidate) {
-            // TODO ошибка адекватная
-            return 'error';
+            throw new HttpException(
+                'Пользователь с таким email существует',
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         const alreadyCreated = await this.getConfirmCodeByEmail(email);
@@ -38,13 +40,15 @@ export class ConfirmCodeService {
         return { successEmail: true };
     }
 
-    async confirm(dto: ConfirmCodeDto) {
+    async confirmCode(dto: ConfirmCodeDto) {
         const { email, confirmCode } = dto;
         // TODO добавить такую же проверку в registration, если за время регистрации уже появился пользователь с таким email - ошибка
         const candidateEmail = await this.userService.getUserByEmail(email);
         if (candidateEmail) {
-            // TODO прокинуть ошибку пользователь зарегистрирован уже
-            return 'error';
+            throw new HttpException(
+                'Пользователь с таким email существует',
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         const candidate = await this.getConfirmCode(email, confirmCode);
@@ -54,8 +58,10 @@ export class ConfirmCodeService {
         }
 
         if (!candidate) {
-            // TODO ошибку прокинуть bad request неверный код
-            return 'error';
+            throw new HttpException(
+                'Неверный код подтверждения',
+                HttpStatus.BAD_REQUEST
+            );
         }
 
         return { isConfirmed: true };
@@ -80,6 +86,6 @@ export class ConfirmCodeService {
     async removeConfirmCode(email: string) {
         await this.confirmCodeRepository.destroy({ where: { email } });
 
-        return;
+        return true;
     }
 }

@@ -1,3 +1,4 @@
+import { ConfirmCodeService } from './../confirm-code/confirm-code.service';
 import {
     HttpException,
     HttpStatus,
@@ -10,12 +11,15 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../users/users.model';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegistrationUserDto } from './dto/registration-user.dto';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private userService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private confirmCodeService: ConfirmCodeService,
+        private emailService: EmailService
     ) {}
 
     async login(userDto: LoginUserDto) {
@@ -23,6 +27,10 @@ export class AuthService {
         const accessToken = await this.generateToken(user, '1d');
         // TODO записать рефреш в куки, аналогично в регистрации
         const refreshToken = await this.generateToken(user, '30d');
+        console.log(user);
+        delete user.password;
+        console.log(user);
+
         return { user, accessToken };
     }
 
@@ -34,19 +42,27 @@ export class AuthService {
                 HttpStatus.BAD_REQUEST
             );
         }
-
-        // TODO добавить проверку кода подтверждения, что он подтвержден - поле confirmed для этого в confirmCodeService getConfirmCodeByEmail
-        // const { confirmed } = ...
-        // если false - ошибка, true - дальше и удалить из бд, для этого removeConfirmCode в сервисе
+        const {
+            confirmed,
+        } = await this.confirmCodeService.getConfirmCodeByEmail(userDto.email);
+        if (!confirmed) {
+            throw new HttpException(
+                'Код не подтвержден',
+                HttpStatus.BAD_REQUEST
+            );
+        }
 
         const hashPassword = await bcrypt.hash(userDto.password, 5);
         const user = await this.userService.createUser({
             ...userDto,
             password: hashPassword,
         });
-        // TODO отправка письма о регистрации, метод создан в emailService sendUserRegistration, туда прокидывать userDto
+        await this.emailService.sendUserRegistration(userDto);
         const accessToken = await this.generateToken(user, '1d');
         const refreshToken = await this.generateToken(user, '30d');
+        await this.confirmCodeService.removeConfirmCode(user.email);
+        // TODO выпиливать везде пароль из юзера
+
         return { user, accessToken };
     }
 
@@ -69,8 +85,9 @@ export class AuthService {
                 return user;
             }
         }
-        throw new UnauthorizedException({
-            message: 'Некорректный email или пароль',
-        });
+        throw new HttpException(
+            'Некорректный email или пароль',
+            HttpStatus.BAD_REQUEST
+        );
     }
 }
