@@ -42,7 +42,6 @@ export class ConfirmCodeService {
 
     async confirmCode(dto: ConfirmCodeDto) {
         const { email, confirmCode } = dto;
-        // TODO добавить такую же проверку в registration, если за время регистрации уже появился пользователь с таким email - ошибка
         const candidateEmail = await this.userService.getUserByEmail(email);
         if (candidateEmail) {
             throw new HttpException(
