@@ -19,8 +19,4 @@ export class RegistrationUserDto {
     @ApiProperty({ example: '12345', description: 'Фамилия' })
     @IsString({ message: 'Должно быть строкой' })
     readonly lastName: string;
-
-    @ApiProperty({ example: 'qwerty', description: 'Код подтверждения' })
-    @IsString({ message: 'Должно быть строкой' })
-    readonly confirmCode: string;
 }

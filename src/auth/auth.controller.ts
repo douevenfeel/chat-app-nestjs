@@ -23,5 +23,11 @@ export class AuthController {
     // сделать checkout для повторного входа по токену из куки, если он валидный
 
     // TODO
+    // сделать logout - удаление токена из бд, очистка куки
+
+    // TODO
+    // сделать сервис токенов (!)
+
+    // TODO
     // перенести confirm-code.controller сюда, чтобы запросы были на /auth/email, а не /confirmCode/email и тд
 }
