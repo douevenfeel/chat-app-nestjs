@@ -27,6 +27,7 @@ export class UsersService {
     async getAllUsers() {
         const users = await this.userRepository.findAll();
 
+        // TODO пароль у каждого
         return users;
     }
 
@@ -42,6 +43,8 @@ export class UsersService {
         const user = await this.userRepository.findOne({
             where: { id },
         });
+
+        // TODO пароль
         return user;
     }
 }

@@ -27,9 +27,7 @@ export class AuthService {
         const accessToken = await this.generateToken(user, '1d');
         // TODO записать рефреш в куки, аналогично в регистрации
         const refreshToken = await this.generateToken(user, '30d');
-        console.log(user);
-        delete user.password;
-        console.log(user);
+        // TODO пароль
 
         return { user, accessToken };
     }
@@ -61,7 +59,7 @@ export class AuthService {
         const accessToken = await this.generateToken(user, '1d');
         const refreshToken = await this.generateToken(user, '30d');
         await this.confirmCodeService.removeConfirmCode(user.email);
-        // TODO выпиливать везде пароль из юзера
+        // TODO пароль
 
         return { user, accessToken };
     }
