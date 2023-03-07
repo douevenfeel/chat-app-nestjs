@@ -20,7 +20,10 @@ export class AuthService {
 
     async login(userDto: LoginUserDto) {
         const user = await this.validateUser(userDto);
-        return this.generateToken(user);
+        const accessToken = await this.generateToken(user, '1d');
+        // TODO записать рефреш в куки, аналогично в регистрации
+        const refreshToken = await this.generateToken(user, '30d');
+        return { user, accessToken };
     }
 
     async registration(userDto: RegistrationUserDto) {
@@ -42,14 +45,17 @@ export class AuthService {
             password: hashPassword,
         });
         // TODO отправка письма о регистрации, метод создан в emailService sendUserRegistration, туда прокидывать userDto
-        return this.generateToken(user);
+        const accessToken = await this.generateToken(user, '1d');
+        const refreshToken = await this.generateToken(user, '30d');
+        return { user, accessToken };
     }
 
-    private async generateToken(user: User) {
+    private async generateToken(user: User, expiresIn: string) {
         const payload = { email: user.email, id: user.id };
-        return {
-            token: this.jwtService.sign(payload),
-        };
+        const token = await this.jwtService.sign(payload, {
+            expiresIn,
+        });
+        return token;
     }
 
     private async validateUser(userDto: LoginUserDto) {
