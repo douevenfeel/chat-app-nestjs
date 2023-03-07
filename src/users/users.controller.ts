@@ -15,10 +15,10 @@ export class UsersController {
         return this.usersService.getAllUsers();
     }
 
-    @ApiOperation({ summary: 'Найти пользователя по email' })
+    @ApiOperation({ summary: 'Найти пользователя по id' })
     @ApiResponse({ status: 200, type: User })
-    @Get('/:email')
-    getByEmail(@Param('email') email) {
-        return this.usersService.getUserByEmail(email);
+    @Get('/:id')
+    getById(@Param('id') id) {
+        return this.usersService.getUserById(id);
     }
 }
