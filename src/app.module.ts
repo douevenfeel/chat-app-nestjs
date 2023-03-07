@@ -6,6 +6,7 @@ import { User } from './users/users.model';
 import { AuthModule } from './auth/auth.module';
 import { ConfirmCodeModule } from './confirm-code/confirm-code.module';
 import { EmailModule } from './email/email.module';
+import { TokenModule } from './token/token.module';
 
 @Module({
     controllers: [],
@@ -28,6 +29,7 @@ import { EmailModule } from './email/email.module';
         AuthModule,
         ConfirmCodeModule,
         EmailModule,
+        TokenModule,
     ],
 })
 export class AppModule {}

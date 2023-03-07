@@ -34,7 +34,7 @@ export class AuthService {
 
         // TODO добавить проверку кода подтверждения, что он подтвержден - поле confirmed для этого в confirmCodeService getConfirmCodeByEmail
         // const { confirmed } = ...
-        // если false - ошибка, true - дальше и удалить из бд
+        // если false - ошибка, true - дальше и удалить из бд, для этого removeConfirmCode в сервисе
 
         const hashPassword = await bcrypt.hash(userDto.password, 5);
         const user = await this.userService.createUser({

@@ -29,10 +29,11 @@ export class ConfirmCodeService {
         const alreadyCreated = await this.getConfirmCodeByEmail(email);
         if (alreadyCreated) {
             alreadyCreated.confirmCode = confirmCode;
+            alreadyCreated.confirmed = false;
+            alreadyCreated.save();
         } else {
             await this.confirmCodeRepository.create({ email, confirmCode });
         }
-
         await this.emailService.sendUserConfirmation(email, confirmCode);
         return { successEmail: true };
     }
@@ -43,6 +44,7 @@ export class ConfirmCodeService {
         const candidateEmail = await this.userService.getUserByEmail(email);
         if (candidateEmail) {
             // TODO прокинуть ошибку пользователь зарегистрирован уже
+            return 'error';
         }
 
         const candidate = await this.getConfirmCode(email, confirmCode);
@@ -73,5 +75,11 @@ export class ConfirmCodeService {
         });
 
         return confirmCode;
+    }
+
+    async removeConfirmCode(email: string) {
+        await this.confirmCodeRepository.destroy({ where: { email } });
+
+        return;
     }
 }
