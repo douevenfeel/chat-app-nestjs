@@ -1,7 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { UsersService } from './users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './users.model';
+import { UsersService } from './users.service';
 
 @ApiTags('Пользователи')
 @Controller('users')
@@ -18,7 +18,8 @@ export class UsersController {
     @ApiOperation({ summary: 'Найти пользователя по id' })
     @ApiResponse({ status: 200, type: User })
     @Get(':id')
-    getById(@Param('id') id: string) {
+    getById(@Param('id') id: number) {
+        console.log(id);
         return this.usersService.getUserById(id);
     }
 }
