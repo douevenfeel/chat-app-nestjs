@@ -12,9 +12,8 @@ export class LoginUserDto {
     @MinLength(4, {
         message: 'Пароль должен быть не меньше 4 символов',
     })
-    @MaxLength(20, {
-        message: 'Пароль должен быть не больше 20 символов',
+    @MaxLength(127, {
+        message: 'Пароль должен быть не больше 127 символов',
     })
-    // TODO подправить везде валидацию на такую
     readonly password: string;
 }

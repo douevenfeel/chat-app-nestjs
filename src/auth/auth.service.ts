@@ -27,7 +27,9 @@ export class AuthService {
         const accessToken = await this.generateToken(user, '1d');
         // TODO записать рефреш в куки, аналогично в регистрации
         const refreshToken = await this.generateToken(user, '30d');
-        // TODO пароль
+
+        // @ts-ignore
+        console.log(delete user.dataValues.password);
 
         return { user, accessToken };
     }
@@ -59,7 +61,9 @@ export class AuthService {
         const accessToken = await this.generateToken(user, '1d');
         const refreshToken = await this.generateToken(user, '30d');
         await this.confirmCodeService.removeConfirmCode(user.email);
-        // TODO пароль
+
+        // @ts-ignore
+        console.log(delete user.dataValues.password);
 
         return { user, accessToken };
     }
