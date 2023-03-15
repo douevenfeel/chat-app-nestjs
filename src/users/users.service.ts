@@ -27,7 +27,11 @@ export class UsersService {
     async getAllUsers() {
         const users = await this.userRepository.findAll();
 
-        // TODO пароль у каждого
+        users.map((user) => {
+            // @ts-ignore
+            delete user.dataValues.password;
+        });
+
         return users;
     }
 
@@ -44,7 +48,9 @@ export class UsersService {
             where: { id },
         });
 
-        // TODO пароль
+        // @ts-ignore
+        delete user.dataValues.password;
+
         return user;
     }
 }
