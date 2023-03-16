@@ -19,7 +19,7 @@ export class UsersService {
             'orange',
             'yellow',
         ];
-        const avatar: Avatar = colors[Math.round(Math.random() * 9)];
+        const avatar: Avatar = colors[Math.floor(Math.random() * 9)];
         const user = await this.userRepository.create({ ...dto, avatar });
         return user;
     }

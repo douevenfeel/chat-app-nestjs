@@ -37,7 +37,7 @@ export class ConfirmCodeService {
             await this.confirmCodeRepository.create({ email, confirmCode });
         }
         await this.emailService.sendUserConfirmation(email, confirmCode);
-        return { successEmail: true };
+        return { email };
     }
 
     async confirmCode(dto: ConfirmCodeDto) {
