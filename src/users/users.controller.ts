@@ -1,8 +1,18 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { UpdateProfileInfoDto } from './dto/update-profile-info.dto';
+import {
+    Body,
+    Controller,
+    Get,
+    Param,
+    Put,
+    Req,
+    UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './users.model';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard, RequestUser } from '../auth/jwt-auth.guard';
+import { Request } from 'express';
 
 @ApiTags('Пользователи')
 @Controller('users')
@@ -24,5 +34,17 @@ export class UsersController {
     getById(@Param('id') id: number) {
         console.log(id);
         return this.usersService.getUserById(id);
+    }
+
+    @ApiOperation({ summary: 'Обновить информацию профиля' })
+    @ApiResponse({ status: 200, type: [User] })
+    @UseGuards(JwtAuthGuard)
+    @Put()
+    updateProfileInfo(
+        @Req() request: RequestUser,
+        @Body() data: UpdateProfileInfoDto
+    ) {
+        console.log(data);
+        return this.usersService.updateProfileInfo(request, data);
     }
 }

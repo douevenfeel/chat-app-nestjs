@@ -1,7 +1,9 @@
+import { UpdateProfileInfoDto } from './dto/update-profile-info.dto';
 import { Injectable } from '@nestjs/common';
 import { Avatar, User } from './users.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from './dto/create-user.dto';
+import { RequestUser } from 'src/auth/jwt-auth.guard';
 
 @Injectable()
 export class UsersService {
@@ -47,6 +49,24 @@ export class UsersService {
         const user = await this.userRepository.findOne({
             where: { id },
         });
+
+        // @ts-ignore
+        delete user.dataValues.password;
+
+        return user;
+    }
+
+    async updateProfileInfo(request: RequestUser, data: UpdateProfileInfoDto) {
+        const { id } = request.user;
+        const user = await this.userRepository.findOne({
+            where: { id },
+        });
+        // TODO по регулярке проверять, что нет цифр в дате, либо через class-validator (?)
+        if (user) {
+            user.firstName = data.firstName;
+            user.lastName = data.lastName;
+            user.save();
+        }
 
         // @ts-ignore
         delete user.dataValues.password;
