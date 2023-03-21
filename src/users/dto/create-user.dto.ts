@@ -1,20 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-    IsEmail,
-    IsString,
-    Length,
-    MaxLength,
-    MinLength,
-} from 'class-validator';
+import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateUserDto {
     @ApiProperty({ example: 'user@mail.ru', description: 'Почта' })
-    @IsString({ message: 'Должно быть строкой' })
+    @IsString({ message: 'Email должен быть строкой' })
     @IsEmail({}, { message: 'Некорректный email' })
     readonly email: string;
 
     @ApiProperty({ example: '12345', description: 'Пароль' })
-    @IsString({ message: 'Должно быть строкой' })
+    @IsString({ message: 'Пароль должен быть строкой' })
     @MinLength(4, {
         message: 'Пароль должен быть не меньше 4 символов',
     })
@@ -24,10 +18,10 @@ export class CreateUserDto {
     readonly password: string;
 
     @ApiProperty({ example: '12345', description: 'Имя' })
-    @IsString({ message: 'Должно быть строкой' })
+    @IsString({ message: 'Имя должно быть строкой' })
     readonly firstName: string;
 
     @ApiProperty({ example: '12345', description: 'Фамилия' })
-    @IsString({ message: 'Должно быть строкой' })
+    @IsString({ message: 'Фамилия должна быть строкой' })
     readonly lastName: string;
 }

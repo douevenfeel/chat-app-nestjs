@@ -20,17 +20,118 @@ export class FriendsService {
     async addFriend(request: RequestUser, to: number) {
         const { id } = request.user;
         if (id === to) {
+            // TODO обработать
             return 'error';
         }
         const candidate = await this.usersService.getUserById(to);
         if (!candidate) {
+            // TODO обработать
             return 'error';
         }
-        await this.friendRepository.create({
-            from: id,
-            to,
+        const friendRequest = await this.friendRepository.findOne({
+            where: { from: [id, to], to: [id, to] },
         });
-        return await this.getAllFriends(id);
+        if (friendRequest) {
+            if (friendRequest.from === id) {
+                friendRequest.isRequested = true;
+            } else {
+                friendRequest.isAccepted = true;
+            }
+            friendRequest.save();
+        } else {
+            await this.friendRepository.create({
+                from: id,
+                to,
+            });
+        }
+        return { friendStatus: 'cancel' };
+    }
+
+    async acceptFriendRequest(request: RequestUser, to: number) {
+        const { id } = request.user;
+        if (id === to) {
+            // TODO обработать
+            return 'error';
+        }
+        const candidate = await this.usersService.getUserById(to);
+        if (!candidate) {
+            // TODO обработать
+            return 'error';
+        }
+        const friendRequest = await this.friendRepository.findOne({
+            where: { from: [id, to], to: [id, to] },
+        });
+        if (!friendRequest) {
+            // TODO обработать
+            return 'error';
+        }
+        if (friendRequest.from === id) {
+            friendRequest.isRequested = true;
+        } else {
+            friendRequest.isAccepted = true;
+        }
+        friendRequest.save();
+        return { friendStatus: 'delete' };
+    }
+
+    async cancelFriendRequest(request: RequestUser, to: number) {
+        const { id } = request.user;
+        if (id === to) {
+            // TODO обработать
+            return 'error';
+        }
+        const candidate = await this.usersService.getUserById(to);
+        if (!candidate) {
+            // TODO обработать
+            return 'error';
+        }
+        const friendRequest = await this.friendRepository.findOne({
+            where: { from: [id, to], to: [id, to] },
+        });
+        if (!friendRequest) {
+            // TODO обработать
+            return 'error';
+        }
+        if (friendRequest.from === id) {
+            friendRequest.isRequested = false;
+        } else {
+            friendRequest.isAccepted = false;
+        }
+        friendRequest.save();
+        if (!friendRequest.isAccepted && !friendRequest.isRequested) {
+            friendRequest.destroy();
+        }
+        return { friendStatus: 'add' };
+    }
+
+    async deleteFriend(request: RequestUser, to: number) {
+        const { id } = request.user;
+        if (id === to) {
+            // TODO обработать
+            return 'error';
+        }
+        const candidate = await this.usersService.getUserById(to);
+        if (!candidate) {
+            // TODO обработать
+            return 'error';
+        }
+        const friendRequest = await this.friendRepository.findOne({
+            where: { from: [id, to], to: [id, to] },
+        });
+        if (!friendRequest) {
+            // TODO обработать
+            return 'error';
+        }
+        if (friendRequest.from === id) {
+            friendRequest.isRequested = false;
+        } else {
+            friendRequest.isAccepted = false;
+        }
+        friendRequest.save();
+        if (!friendRequest.isAccepted && !friendRequest.isRequested) {
+            friendRequest.destroy();
+        }
+        return { friendStatus: 'accept' };
     }
 
     async getAllFriends(id: number) {

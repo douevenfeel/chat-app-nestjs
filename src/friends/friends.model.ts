@@ -47,6 +47,13 @@ export class Friend extends Model<Friend, FriendCreationAttrs> {
     @BelongsTo(() => User, 'to')
     toUser: User;
 
+    @ApiProperty({ example: 'true', description: 'Отправлена заявка или нет' })
+    @Column({
+        type: DataType.BOOLEAN,
+        defaultValue: true,
+    })
+    isRequested: boolean;
+
     @ApiProperty({ example: 'true', description: 'Принята заявка или нет' })
     @Column({
         type: DataType.BOOLEAN,

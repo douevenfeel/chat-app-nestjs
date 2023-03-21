@@ -12,7 +12,6 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './users.model';
 import { UsersService } from './users.service';
 import { JwtAuthGuard, RequestUser } from '../auth/jwt-auth.guard';
-import { Request } from 'express';
 
 @ApiTags('Пользователи')
 @Controller('users')
@@ -32,7 +31,6 @@ export class UsersController {
     @Get(':id')
     @UseGuards(JwtAuthGuard)
     getById(@Param('id') id: number) {
-        console.log(id);
         return this.usersService.getUserById(id);
     }
 
