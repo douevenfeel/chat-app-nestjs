@@ -35,7 +35,7 @@ export class UsersController {
     }
 
     @ApiOperation({ summary: 'Обновить информацию профиля' })
-    @ApiResponse({ status: 200, type: [User] })
+    @ApiResponse({ status: 200, type: User })
     @UseGuards(JwtAuthGuard)
     @Put()
     updateProfileInfo(

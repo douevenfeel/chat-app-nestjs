@@ -4,8 +4,8 @@ import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfirmCodeModule } from 'src/confirm-code/confirm-code.module';
-import { EmailService } from 'src/email/email.service';
 import { EmailModule } from 'src/email/email.module';
+import { OnlineInfoModule } from 'src/online-info/online-info.module';
 
 @Module({
     controllers: [AuthController],
@@ -20,6 +20,7 @@ import { EmailModule } from 'src/email/email.module';
         }),
         forwardRef(() => ConfirmCodeModule),
         EmailModule,
+        OnlineInfoModule,
     ],
     exports: [AuthService, JwtModule],
 })

@@ -1,13 +1,18 @@
+import { OnlineInfoService } from './../online-info/online-info.service';
 import { UpdateProfileInfoDto } from './dto/update-profile-info.dto';
 import { Injectable } from '@nestjs/common';
 import { Avatar, User } from './users.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RequestUser } from 'src/auth/jwt-auth.guard';
+import { OnlineInfo } from 'src/online-info/online-info.model';
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectModel(User) private userRepository: typeof User) {}
+    constructor(
+        @InjectModel(User) private userRepository: typeof User,
+        private onlineInfoService: OnlineInfoService
+    ) {}
 
     async createUser(dto: CreateUserDto) {
         const colors: Avatar[] = [
@@ -23,11 +28,18 @@ export class UsersService {
         ];
         const avatar: Avatar = colors[Math.floor(Math.random() * 9)];
         const user = await this.userRepository.create({ ...dto, avatar });
+        await this.onlineInfoService.create(user.id);
+        const userWithOnlineInfo = await this.userRepository.findOne({
+            where: { id: user.id },
+            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
+        });
         return user;
     }
 
     async getAllUsers() {
-        const users = await this.userRepository.findAll();
+        const users = await this.userRepository.findAll({
+            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
+        });
 
         users.map((user) => {
             // @ts-ignore
@@ -40,6 +52,7 @@ export class UsersService {
     async getUserByEmail(email: string) {
         const user = await this.userRepository.findOne({
             where: { email },
+            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
         });
 
         return user;
@@ -47,6 +60,7 @@ export class UsersService {
     async getUserById(id: number) {
         const user = await this.userRepository.findOne({
             where: { id },
+            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
         });
 
         // @ts-ignore
@@ -59,6 +73,7 @@ export class UsersService {
         const { id } = request.user;
         const user = await this.userRepository.findOne({
             where: { id },
+            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
         });
         // TODO по регулярке проверять, что нет цифр в дате, либо через class-validator (?)
         if (user) {

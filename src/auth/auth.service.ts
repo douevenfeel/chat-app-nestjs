@@ -9,6 +9,7 @@ import { RegistrationUserDto } from './dto/registration-user.dto';
 import { EmailService } from 'src/email/email.service';
 import { Request, Response } from 'express';
 import { RequestUser } from './jwt-auth.guard';
+import { OnlineInfoService } from 'src/online-info/online-info.service';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,8 @@ export class AuthService {
         private userService: UsersService,
         private jwtService: JwtService,
         private confirmCodeService: ConfirmCodeService,
-        private emailService: EmailService
+        private emailService: EmailService,
+        private onlineInfoService: OnlineInfoService
     ) {}
 
     async login(userDto: LoginUserDto, response: Response) {
@@ -24,6 +26,7 @@ export class AuthService {
         const accessToken = await this.generateToken(user, '1d');
         const refreshToken = await this.generateToken(user, '30d');
         response.cookie('refreshToken', refreshToken);
+        await this.onlineInfoService.setOnline(user.id);
 
         // @ts-ignore
         delete user.dataValues.password;
@@ -59,6 +62,7 @@ export class AuthService {
         const refreshToken = await this.generateToken(user, '30d');
         response.cookie('refreshToken', refreshToken);
         await this.confirmCodeService.removeConfirmCode(user.email);
+        await this.onlineInfoService.setOnline(user.id);
 
         // @ts-ignore
         console.log(delete user.dataValues.password);
@@ -66,8 +70,10 @@ export class AuthService {
         return { user, accessToken };
     }
 
-    async logout(response: Response) {
+    async logout(request: RequestUser, response: Response) {
+        const { id } = request.user;
         response.clearCookie('refreshToken');
+        await this.onlineInfoService.setOffline(id);
         return true;
     }
 
@@ -76,6 +82,7 @@ export class AuthService {
         const user = await this.userService.getUserById(id);
         const accessToken = await this.generateToken(user, '1d');
         const refreshToken = await this.generateToken(user, '30d');
+        await this.onlineInfoService.setOnline(id);
         response.cookie('refreshToken', refreshToken);
         return { user, accessToken };
     }

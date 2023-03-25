@@ -1,4 +1,12 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import { OnlineInfo } from './../online-info/online-info.model';
+import {
+    Column,
+    DataType,
+    HasMany,
+    HasOne,
+    Model,
+    Table,
+} from 'sequelize-typescript';
 import { ApiProperty } from '@nestjs/swagger';
 import { Friend } from '../friends/friends.model';
 
@@ -49,4 +57,7 @@ export class User extends Model<User, UserCreationAttrs> {
     @ApiProperty({ example: 'pink', description: 'Цвет аватара' })
     @Column({ type: DataType.STRING })
     avatar: string;
+
+    @HasOne(() => OnlineInfo)
+    onlineInfo: OnlineInfo;
 }
