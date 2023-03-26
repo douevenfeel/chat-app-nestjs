@@ -52,20 +52,27 @@ export class FriendsService {
             const clearFriends = await this.usersService.getUsersByIds(ids);
             // TODO сортировка по имени, потом сделать разные варианты, получая query параметр
             // TODO в дальнейшем прикрутить пагинацию
-            return clearFriends.sort(
-                (
-                    { firstName: firstNameA }: User,
-                    { firstName: firstNameB }: User
-                ) => {
-                    if (firstNameA < firstNameB) {
-                        return -1;
+            console.log(clearFriends);
+            return clearFriends
+                .sort(
+                    (
+                        { firstName: firstNameA }: User,
+                        { firstName: firstNameB }: User
+                    ) => {
+                        if (firstNameA < firstNameB) {
+                            return -1;
+                        }
+                        if (firstNameA > firstNameB) {
+                            return 1;
+                        }
+                        return 0;
                     }
-                    if (firstNameA > firstNameB) {
-                        return 1;
-                    }
-                    return 0;
-                }
-            );
+                )
+                .map((friend) => {
+                    // @ts-ignore
+                    friend.dataValues.friendStatus = friendStatus;
+                    return friend;
+                });
         }
         return [];
     }
@@ -87,11 +94,21 @@ export class FriendsService {
         if (candidate.from === userId && candidate.isRequested !== true) {
             candidate.isRequested = true;
             candidate.save();
+            if (candidate.isAccepted) {
+                return { id: candidate.to, friendStatus: 3 };
+            } else {
+                return { id: candidate.to, friendStatus: 1 };
+            }
         } else if (candidate.to === userId && candidate.isAccepted !== true) {
             candidate.isAccepted = true;
             candidate.save();
+            if (candidate.isRequested) {
+                return { id: candidate.to, friendStatus: 3 };
+            } else {
+                return { id: candidate.to, friendStatus: 2 };
+            }
         }
-        return candidate;
+        return { id: candidate.to, friendStatus: 3 };
     }
 
     async deleteFriend(userId: number, id: number) {
@@ -113,11 +130,21 @@ export class FriendsService {
         if (candidate.from === userId && candidate.isRequested !== false) {
             candidate.isRequested = false;
             candidate.save();
+            if (candidate.isAccepted) {
+                return { id: candidate.to, friendStatus: 2 };
+            } else {
+                return { id: candidate.to, friendStatus: 0 };
+            }
         } else if (candidate.to === userId && candidate.isAccepted !== false) {
             candidate.isAccepted = false;
             candidate.save();
+            if (candidate.isRequested) {
+                return { id: candidate.to, friendStatus: 1 };
+            } else {
+                return { id: candidate.to, friendStatus: 0 };
+            }
         }
-        return candidate;
+        return { id: candidate.to, friendStatus: 0 };
     }
 
     async getFriendStatus(userId: number, id: number) {

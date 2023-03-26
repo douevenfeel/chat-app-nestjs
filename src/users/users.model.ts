@@ -8,7 +8,6 @@ import {
     Table,
 } from 'sequelize-typescript';
 import { ApiProperty } from '@nestjs/swagger';
-import { Friend } from '../friends/friends.model';
 
 export type Avatar =
     | 'green'
@@ -60,4 +59,6 @@ export class User extends Model<User, UserCreationAttrs> {
 
     @HasOne(() => OnlineInfo)
     onlineInfo: OnlineInfo;
+
+    friendStatus: 1 | 2 | 3;
 }
