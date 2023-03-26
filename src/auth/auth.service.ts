@@ -74,7 +74,7 @@ export class AuthService {
         const { id } = request.user;
         response.clearCookie('refreshToken');
         await this.onlineInfoService.setOffline(id);
-        return true;
+        return { OK: 1 };
     }
 
     async checkout(request: RequestUser, response: Response) {

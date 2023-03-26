@@ -3,12 +3,13 @@ import {
     Get,
     Param,
     Post,
+    Query,
     Req,
     Res,
     UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { FriendsService } from './friends.service';
+import { FriendsService, FriendStatus } from './friends.service';
 import { JwtAuthGuard, RequestUser } from '../auth/jwt-auth.guard';
 
 @ApiTags('Друзья')
@@ -16,33 +17,23 @@ import { JwtAuthGuard, RequestUser } from '../auth/jwt-auth.guard';
 export class FriendsController {
     constructor(private friendsService: FriendsService) {}
 
-    @Get()
+    @Get(':id')
     @UseGuards(JwtAuthGuard)
-    getFriends(@Req() request: RequestUser) {
-        return this.friendsService.getFriends(request);
+    getFriends(@Param('id') id: number, @Query('status') status: 1 | 2 | 3) {
+        return this.friendsService.getAllFriends(id, status);
     }
 
-    @Post('/add/:to')
+    @Post('/add/:id')
     @UseGuards(JwtAuthGuard)
-    addFriend(@Req() request: RequestUser, @Param('to') to: number) {
-        return this.friendsService.addFriend(request, to);
+    addFriend(@Param('id') id: number, @Req() request: RequestUser) {
+        const { id: userId } = request.user;
+        return this.friendsService.addFriend(userId, +id);
     }
 
-    @Post('/accept/:to')
+    @Post('/delete/:id')
     @UseGuards(JwtAuthGuard)
-    acceptFriendRequest(@Req() request: RequestUser, @Param('to') to: number) {
-        return this.friendsService.acceptFriendRequest(request, to);
-    }
-
-    @Post('/cancel/:to')
-    @UseGuards(JwtAuthGuard)
-    cancelFriendRequest(@Req() request: RequestUser, @Param('to') to: number) {
-        return this.friendsService.cancelFriendRequest(request, to);
-    }
-
-    @Post('/delete/:to')
-    @UseGuards(JwtAuthGuard)
-    deleteFriend(@Req() request: RequestUser, @Param('to') to: number) {
-        return this.friendsService.deleteFriend(request, to);
+    deleteFriend(@Param('id') id: number, @Req() request: RequestUser) {
+        const { id: userId } = request.user;
+        return this.friendsService.deleteFriend(userId, +id);
     }
 }

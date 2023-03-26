@@ -31,9 +31,15 @@ export class UsersService {
         await this.onlineInfoService.create(user.id);
         const userWithOnlineInfo = await this.userRepository.findOne({
             where: { id: user.id },
-            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
+            include: [
+                {
+                    model: OnlineInfo,
+                    as: 'onlineInfo',
+                    attributes: ['isOnline', 'lastSeen'],
+                },
+            ],
         });
-        return user;
+        return userWithOnlineInfo;
     }
 
     async getAllUsers() {
@@ -52,7 +58,13 @@ export class UsersService {
     async getUserByEmail(email: string) {
         const user = await this.userRepository.findOne({
             where: { email },
-            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
+            include: [
+                {
+                    model: OnlineInfo,
+                    as: 'onlineInfo',
+                    attributes: ['isOnline', 'lastSeen'],
+                },
+            ],
         });
 
         return user;
@@ -60,8 +72,15 @@ export class UsersService {
     async getUserById(id: number) {
         const user = await this.userRepository.findOne({
             where: { id },
-            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
+            include: [
+                {
+                    model: OnlineInfo,
+                    as: 'onlineInfo',
+                    attributes: ['isOnline', 'lastSeen'],
+                },
+            ],
         });
+        // TODO прикрутить статус friendsService.getFriendStatus(userId, id)
 
         // @ts-ignore
         delete user.dataValues.password;
@@ -73,7 +92,13 @@ export class UsersService {
         const { id } = request.user;
         const user = await this.userRepository.findOne({
             where: { id },
-            include: [{ model: OnlineInfo, as: 'onlineInfo' }],
+            include: [
+                {
+                    model: OnlineInfo,
+                    as: 'onlineInfo',
+                    attributes: ['isOnline', 'lastSeen'],
+                },
+            ],
         });
         // TODO по регулярке проверять, что нет цифр в дате, либо через class-validator (?)
         if (user) {
@@ -86,5 +111,21 @@ export class UsersService {
         delete user.dataValues.password;
 
         return user;
+    }
+
+    async getUsersByIds(ids: number[]) {
+        const friends = await this.userRepository.findAll({
+            attributes: ['id', 'firstName', 'lastName', 'avatar'],
+            where: { id: [...ids] },
+            include: [
+                {
+                    model: OnlineInfo,
+                    as: 'onlineInfo',
+                    attributes: ['isOnline', 'lastSeen'],
+                },
+            ],
+        });
+
+        return friends;
     }
 }

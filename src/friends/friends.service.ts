@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Friend } from './friends.model';
-import { RequestUser } from '../auth/jwt-auth.guard';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/users.model';
+import { User } from 'src/users/users.model';
+
+export type FriendStatus = 0 | 1 | 2 | 3;
 
 @Injectable()
 export class FriendsService {
@@ -12,174 +13,139 @@ export class FriendsService {
         private usersService: UsersService
     ) {}
 
-    async getFriends(request: RequestUser) {
-        const { id } = request.user;
-        return await this.getAllFriends(id);
-    }
+    async getAllFriends(id: number, friendStatus: 1 | 2 | 3) {
+        let status = {};
+        const ids = [];
+        switch (+friendStatus) {
+            case 1:
+                status = { isRequested: true, isAccepted: false };
 
-    async addFriend(request: RequestUser, to: number) {
-        const { id } = request.user;
-        if (id === to) {
-            // TODO обработать
-            return 'error';
-        }
-        const candidate = await this.usersService.getUserById(to);
-        if (!candidate) {
-            // TODO обработать
-            return 'error';
-        }
-        const friendRequest = await this.friendRepository.findOne({
-            where: { from: [id, to], to: [id, to] },
-        });
-        if (friendRequest) {
-            if (friendRequest.from === id) {
-                friendRequest.isRequested = true;
-            } else {
-                friendRequest.isAccepted = true;
-            }
-            friendRequest.save();
-        } else {
-            await this.friendRepository.create({
-                from: id,
-                to,
-            });
-        }
-        return { friendStatus: 'cancel' };
-    }
+                break;
+            case 2:
+                status = { isRequested: false, isAccepted: true };
 
-    async acceptFriendRequest(request: RequestUser, to: number) {
-        const { id } = request.user;
-        if (id === to) {
-            // TODO обработать
-            return 'error';
-        }
-        const candidate = await this.usersService.getUserById(to);
-        if (!candidate) {
-            // TODO обработать
-            return 'error';
-        }
-        const friendRequest = await this.friendRepository.findOne({
-            where: { from: [id, to], to: [id, to] },
-        });
-        if (!friendRequest) {
-            // TODO обработать
-            return 'error';
-        }
-        if (friendRequest.from === id) {
-            friendRequest.isRequested = true;
-        } else {
-            friendRequest.isAccepted = true;
-        }
-        friendRequest.save();
-        return { friendStatus: 'delete' };
-    }
+                break;
+            case 3:
+                status = { isRequested: true, isAccepted: true };
 
-    async cancelFriendRequest(request: RequestUser, to: number) {
-        const { id } = request.user;
-        if (id === to) {
-            // TODO обработать
-            return 'error';
+                break;
+            default:
+                return 'error';
         }
-        const candidate = await this.usersService.getUserById(to);
-        if (!candidate) {
-            // TODO обработать
-            return 'error';
-        }
-        const friendRequest = await this.friendRepository.findOne({
-            where: { from: [id, to], to: [id, to] },
-        });
-        if (!friendRequest) {
-            // TODO обработать
-            return 'error';
-        }
-        if (friendRequest.from === id) {
-            friendRequest.isRequested = false;
-        } else {
-            friendRequest.isAccepted = false;
-        }
-        friendRequest.save();
-        if (!friendRequest.isAccepted && !friendRequest.isRequested) {
-            friendRequest.destroy();
-        }
-        return { friendStatus: 'add' };
-    }
-
-    async deleteFriend(request: RequestUser, to: number) {
-        const { id } = request.user;
-        if (id === to) {
-            // TODO обработать
-            return 'error';
-        }
-        const candidate = await this.usersService.getUserById(to);
-        if (!candidate) {
-            // TODO обработать
-            return 'error';
-        }
-        const friendRequest = await this.friendRepository.findOne({
-            where: { from: [id, to], to: [id, to] },
-        });
-        if (!friendRequest) {
-            // TODO обработать
-            return 'error';
-        }
-        if (friendRequest.from === id) {
-            friendRequest.isRequested = false;
-        } else {
-            friendRequest.isAccepted = false;
-        }
-        friendRequest.save();
-        if (!friendRequest.isAccepted && !friendRequest.isRequested) {
-            friendRequest.destroy();
-        }
-        return { friendStatus: 'accept' };
-    }
-
-    async getAllFriends(id: number) {
         const friendsFrom = await this.friendRepository.findAll({
-            where: { from: id },
-            include: [{ model: User, as: 'toUser' }],
+            where: { from: id, ...status },
         });
-        const friendsFromUserToWithStatuses = friendsFrom.map((friend) => {
-            const friendStatus = this.getFriendStatus(friend.from, friend.to);
-            console.log({ user: friend.toUser, friendStatus });
-            return { user: friend.toUser, friendStatus };
-        });
-        console.log(friendsFromUserToWithStatuses);
-
         const friendsTo = await this.friendRepository.findAll({
-            where: { to: id },
-            include: [{ model: User, as: 'fromUser' }],
+            where: { to: id, ...status },
         });
-        const friendsToUserFromWithStatuses = friendsTo.map((friend) => {
-            const friendStatus = this.getFriendStatus(friend.to, friend.from);
-            console.log({ user: friend.fromUser, friendStatus });
-            return { user: friend.fromUser, friendStatus };
-        });
-        console.log(friendsToUserFromWithStatuses);
-
-        const friends = [
-            ...friendsFromUserToWithStatuses,
-            ...friendsToUserFromWithStatuses,
-        ];
-        // const friendsWithStatuses = friends.map((friend) => {
-        //     const friendStatus = this.getFriendStatus(friend.)
-        // })
-        return friends;
+        friendsFrom &&
+            friendsFrom.map((friend) => {
+                ids.push(friend.to);
+                return friend;
+            });
+        friendsTo &&
+            friendsTo.map((friend) => {
+                ids.push(friend.from);
+                return friend;
+            });
+        if (ids) {
+            const clearFriends = await this.usersService.getUsersByIds(ids);
+            // TODO сортировка по имени, потом сделать разные варианты, получая query параметр
+            // TODO в дальнейшем прикрутить пагинацию
+            return clearFriends.sort(
+                (
+                    { firstName: firstNameA }: User,
+                    { firstName: firstNameB }: User
+                ) => {
+                    if (firstNameA < firstNameB) {
+                        return -1;
+                    }
+                    if (firstNameA > firstNameB) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            );
+        }
+        return [];
     }
 
-    async getFriendStatus(from, to: number) {
-        const friendFrom = await this.friendRepository.findOne({
-            where: { from, to },
+    async addFriend(userId: number, id: number) {
+        if (userId === id) {
+            return 'error';
+        }
+        const candidate = await this.friendRepository.findOne({
+            where: {
+                from: [userId, id],
+                to: [userId, id],
+            },
         });
-        if (friendFrom)
-            if (friendFrom.isAccepted === true) return 'delete';
-            else return 'cancel';
-        const friendTo = await this.friendRepository.findOne({
-            where: { to: from, from: to },
+        if (!candidate) {
+            return await this.friendRepository.create({ from: userId, to: id });
+        }
+
+        if (candidate.from === userId && candidate.isRequested !== true) {
+            candidate.isRequested = true;
+            candidate.save();
+        } else if (candidate.to === userId && candidate.isAccepted !== true) {
+            candidate.isAccepted = true;
+            candidate.save();
+        }
+        return candidate;
+    }
+
+    async deleteFriend(userId: number, id: number) {
+        if (userId === id) {
+            // TODO error
+            return 'error';
+        }
+        const candidate = await this.friendRepository.findOne({
+            where: {
+                from: [userId, id],
+                to: [userId, id],
+            },
         });
-        if (friendTo)
-            if (friendTo.isAccepted === true) return 'delete';
-            else return 'accept';
-        return 'add';
+        if (!candidate) {
+            // TODO error
+            return 'error';
+        }
+
+        if (candidate.from === userId && candidate.isRequested !== false) {
+            candidate.isRequested = false;
+            candidate.save();
+        } else if (candidate.to === userId && candidate.isAccepted !== false) {
+            candidate.isAccepted = false;
+            candidate.save();
+        }
+        return candidate;
+    }
+
+    async getFriendStatus(userId: number, id: number) {
+        const candidateFrom = await this.friendRepository.findOne({
+            where: { from: userId, to: id },
+        });
+        if (candidateFrom) {
+            if (candidateFrom.isRequested && candidateFrom.isAccepted) {
+                return 3;
+            } else if (candidateFrom.isRequested && !candidateFrom.isAccepted) {
+                return 1;
+            } else if (!candidateFrom.isRequested && candidateFrom.isAccepted) {
+                return 2;
+            }
+        }
+        const candidateTo = await this.friendRepository.findOne({
+            where: { to: userId, from: id },
+        });
+        if (candidateTo) {
+            if (candidateTo.isRequested && candidateTo.isAccepted) {
+                return 3;
+            } else if (candidateTo.isRequested && !candidateTo.isAccepted) {
+                return 2;
+            } else if (!candidateTo.isRequested && candidateTo.isAccepted) {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 }
