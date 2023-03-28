@@ -30,8 +30,8 @@ export class UsersController {
     @ApiResponse({ status: 200, type: User })
     @Get(':id')
     @UseGuards(JwtAuthGuard)
-    getById(@Param('id') id: number) {
-        return this.usersService.getUserById(id);
+    getById(@Param('id') id: number, @Req() request: RequestUser) {
+        return this.usersService.getUserById(id, request);
     }
 
     @ApiOperation({ summary: 'Обновить информацию профиля' })
