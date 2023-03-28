@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { FriendsController } from './friends.controller';
 import { UsersModule } from '../users/users.module';
@@ -10,7 +10,6 @@ import { JwtModule } from '@nestjs/jwt';
     controllers: [FriendsController],
     providers: [FriendsService],
     imports: [
-        UsersModule,
         SequelizeModule.forFeature([Friend]),
         JwtModule.register({
             secret: process.env.PRIVATE_KEY || 'SECRET',
@@ -18,6 +17,8 @@ import { JwtModule } from '@nestjs/jwt';
                 expiresIn: '24h',
             },
         }),
+        forwardRef(() => UsersModule),
     ],
+    exports: [FriendsService],
 })
 export class FriendsModule {}

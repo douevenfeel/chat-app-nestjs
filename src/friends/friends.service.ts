@@ -1,42 +1,50 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Friend } from './friends.model';
 import { UsersService } from '../users/users.service';
 import { User } from 'src/users/users.model';
+import { RequestUser } from 'src/auth/jwt-auth.guard';
+import { forwardRef } from '@nestjs/common/utils';
 
-export type FriendStatus = 0 | 1 | 2 | 3;
+export type FriendStatus =
+    | 'possibleFriend'
+    | 'outcomingRequest'
+    | 'incomingRequest'
+    | 'alreadyFriend';
 
 @Injectable()
 export class FriendsService {
     constructor(
         @InjectModel(Friend) private friendRepository: typeof Friend,
+        @Inject(forwardRef(() => UsersService))
         private usersService: UsersService
     ) {}
 
-    async getAllFriends(id: number, friendStatus: 1 | 2 | 3) {
-        let status = {};
+    async getAllFriends(id: number, request: RequestUser) {
+        let query = {};
         const ids = [];
-        switch (+friendStatus) {
-            case 1:
-                status = { isRequested: true, isAccepted: false };
+        const { status, q, section } = request.query;
+        switch (status) {
+            case 'outcomingRequest':
+                query = { isRequested: true, isAccepted: false };
 
                 break;
-            case 2:
-                status = { isRequested: false, isAccepted: true };
+            case 'incomingRequest':
+                query = { isRequested: false, isAccepted: true };
 
                 break;
-            case 3:
-                status = { isRequested: true, isAccepted: true };
+            case 'alreadyFriend':
+                query = { isRequested: true, isAccepted: true };
 
                 break;
             default:
                 return 'error';
         }
         const friendsFrom = await this.friendRepository.findAll({
-            where: { from: id, ...status },
+            where: { from: id, ...query },
         });
         const friendsTo = await this.friendRepository.findAll({
-            where: { to: id, ...status },
+            where: { to: id, ...query },
         });
         friendsFrom &&
             friendsFrom.map((friend) => {
@@ -153,11 +161,11 @@ export class FriendsService {
         });
         if (candidateFrom) {
             if (candidateFrom.isRequested && candidateFrom.isAccepted) {
-                return 3;
+                return 'alreadyFriend';
             } else if (candidateFrom.isRequested && !candidateFrom.isAccepted) {
-                return 1;
+                return 'outcomingRequest';
             } else if (!candidateFrom.isRequested && candidateFrom.isAccepted) {
-                return 2;
+                return 'incomingRequest';
             }
         }
         const candidateTo = await this.friendRepository.findOne({
@@ -165,14 +173,14 @@ export class FriendsService {
         });
         if (candidateTo) {
             if (candidateTo.isRequested && candidateTo.isAccepted) {
-                return 3;
+                return 'alreadyFriend';
             } else if (candidateTo.isRequested && !candidateTo.isAccepted) {
-                return 2;
+                return 'incomingRequest';
             } else if (!candidateTo.isRequested && candidateTo.isAccepted) {
-                return 1;
+                return 'outcomingRequest';
             }
         }
 
-        return 0;
+        return 'possibleFriend';
     }
 }

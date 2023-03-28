@@ -1,17 +1,21 @@
 import { OnlineInfoService } from './../online-info/online-info.service';
 import { UpdateProfileInfoDto } from './dto/update-profile-info.dto';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Avatar, User } from './users.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RequestUser } from 'src/auth/jwt-auth.guard';
 import { OnlineInfo } from 'src/online-info/online-info.model';
+import { FriendsService } from 'src/friends/friends.service';
+import { forwardRef } from '@nestjs/common/utils';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectModel(User) private userRepository: typeof User,
-        private onlineInfoService: OnlineInfoService
+        private onlineInfoService: OnlineInfoService,
+        @Inject(forwardRef(() => FriendsService))
+        private friendService: FriendsService
     ) {}
 
     async createUser(dto: CreateUserDto) {
@@ -69,7 +73,7 @@ export class UsersService {
 
         return user;
     }
-    async getUserById(id: number) {
+    async getUserById(id: number, request?: RequestUser) {
         const user = await this.userRepository.findOne({
             where: { id },
             include: [
@@ -80,7 +84,10 @@ export class UsersService {
                 },
             ],
         });
-        // TODO прикрутить статус friendsService.getFriendStatus(userId, id)
+        if (request) {
+            const { id: userId } = request.user;
+            const status = await this.friendService.getFriendStatus(userId, id);
+        }
 
         // @ts-ignore
         delete user.dataValues.password;
