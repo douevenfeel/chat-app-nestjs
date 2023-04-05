@@ -10,7 +10,6 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FriendsService, FriendStatus } from './friends.service';
 import { JwtAuthGuard, RequestUser } from '../auth/jwt-auth.guard';
-import { clearConfigCache } from 'prettier';
 import { Friend } from './friends.model';
 
 @ApiTags('Друзья')
@@ -26,21 +25,12 @@ export class FriendsController {
         return this.friendsService.getAllFriends(id, request);
     }
 
-    @ApiOperation({ summary: 'Добавить друга' })
+    @ApiOperation({ summary: 'Обновление friendStatus' })
     @ApiResponse({ status: 200 })
-    @Post('/add/:id')
+    @Post(':id')
     @UseGuards(JwtAuthGuard)
-    addFriend(@Param('id') id: number, @Req() request: RequestUser) {
+    updateFriendStatus(@Param('id') id: number, @Req() request: RequestUser) {
         const { id: userId } = request.user;
-        return this.friendsService.addFriend(userId, +id);
-    }
-
-    @ApiOperation({ summary: 'Удалить друга' })
-    @ApiResponse({ status: 200 })
-    @Post('/delete/:id')
-    @UseGuards(JwtAuthGuard)
-    deleteFriend(@Param('id') id: number, @Req() request: RequestUser) {
-        const { id: userId } = request.user;
-        return this.friendsService.deleteFriend(userId, +id);
+        return this.friendsService.updateFriendStatus(userId, +id);
     }
 }

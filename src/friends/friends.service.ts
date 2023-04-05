@@ -85,7 +85,7 @@ export class FriendsService {
         return [];
     }
 
-    async addFriend(userId: number, id: number) {
+    async updateFriendStatus(userId: number, id: number) {
         if (userId === id) {
             return 'error';
         }
@@ -96,63 +96,40 @@ export class FriendsService {
             },
         });
         if (!candidate) {
-            return await this.friendRepository.create({ from: userId, to: id });
+            await this.friendRepository.create({ from: userId, to: id });
+            return { id, friendStatus: 'outcomingRequest' };
         }
-
-        if (candidate.from === userId && candidate.isRequested !== true) {
-            candidate.isRequested = true;
+        if (candidate.from === userId) {
+            candidate.isRequested = !candidate.isRequested;
             candidate.save();
-            if (candidate.isAccepted) {
-                return { id: candidate.to, friendStatus: 3 };
-            } else {
-                return { id: candidate.to, friendStatus: 1 };
+            if (candidate.isRequested && candidate.isAccepted) {
+                return { id: candidate.to, friendStatus: 'alreadyFriend' };
             }
-        } else if (candidate.to === userId && candidate.isAccepted !== true) {
-            candidate.isAccepted = true;
-            candidate.save();
-            if (candidate.isRequested) {
-                return { id: candidate.to, friendStatus: 3 };
-            } else {
-                return { id: candidate.to, friendStatus: 2 };
+            if (candidate.isRequested && !candidate.isAccepted) {
+                return { id: candidate.to, friendStatus: 'outcomingRequest' };
             }
-        }
-        return { id: candidate.to, friendStatus: 3 };
-    }
-
-    async deleteFriend(userId: number, id: number) {
-        if (userId === id) {
-            // TODO error
-            return 'error';
-        }
-        const candidate = await this.friendRepository.findOne({
-            where: {
-                from: [userId, id],
-                to: [userId, id],
-            },
-        });
-        if (!candidate) {
-            // TODO error
-            return 'error';
-        }
-
-        if (candidate.from === userId && candidate.isRequested !== false) {
-            candidate.isRequested = false;
-            candidate.save();
-            if (candidate.isAccepted) {
-                return { id: candidate.to, friendStatus: 2 };
-            } else {
-                return { id: candidate.to, friendStatus: 0 };
+            if (!candidate.isRequested && candidate.isAccepted) {
+                return { id: candidate.to, friendStatus: 'incomingRequest' };
             }
-        } else if (candidate.to === userId && candidate.isAccepted !== false) {
-            candidate.isAccepted = false;
+            if (!candidate.isRequested && !candidate.isAccepted) {
+                return { id: candidate.to, friendStatus: 'possibleFriend' };
+            }
+        } else if (candidate.to === userId) {
+            candidate.isAccepted = !candidate.isAccepted;
             candidate.save();
-            if (candidate.isRequested) {
-                return { id: candidate.to, friendStatus: 1 };
-            } else {
-                return { id: candidate.to, friendStatus: 0 };
+            if (candidate.isRequested && candidate.isAccepted) {
+                return { id: candidate.from, friendStatus: 'alreadyFriend' };
+            }
+            if (candidate.isRequested && !candidate.isAccepted) {
+                return { id: candidate.from, friendStatus: 'incomingRequest' };
+            }
+            if (!candidate.isRequested && candidate.isAccepted) {
+                return { id: candidate.from, friendStatus: 'outcomingRequest' };
+            }
+            if (!candidate.isRequested && !candidate.isAccepted) {
+                return { id: candidate.from, friendStatus: 'possibleFriend' };
             }
         }
-        return { id: candidate.to, friendStatus: 0 };
     }
 
     async getFriendStatus(userId: number, id: number) {
