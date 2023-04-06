@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Friend } from './friends.model';
 import { UsersService } from '../users/users.service';
@@ -38,7 +38,10 @@ export class FriendsService {
 
                 break;
             default:
-                return 'error';
+                throw new HttpException(
+                    'Invalid status',
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                );
         }
         const friendsFrom = await this.friendRepository.findAll({
             where: { from: id, ...query },
@@ -58,17 +61,25 @@ export class FriendsService {
             });
         if (ids) {
             const clearFriends = await this.usersService.getUsersByIds(ids);
-            // TODO сортировка по имени, потом сделать разные варианты, получая query параметр
             // TODO в дальнейшем прикрутить пагинацию
             console.log(clearFriends);
-            // TODO заменить counts на нормальные данные, не замоканные
-            // TODO !!! ВЕЗДЕ заменить return 'error' на корректную ошибку
+            const incomingRequestsArray = await this.friendRepository.findAll({
+                where: { to: id, ...{ isRequested: true, isAccepted: false } },
+            });
+            const outcomingRequestsArray = await this.friendRepository.findAll({
+                where: {
+                    from: id,
+                    ...{ isRequested: true, isAccepted: false },
+                },
+            });
             return {
                 counts: {
-                    friends: 1,
-                    onlineFriends: 1,
-                    incomingRequests: 1,
-                    outcomingRequests: 1,
+                    friends: clearFriends.length,
+                    onlineFriends: clearFriends.filter(
+                        (friend) => friend.onlineInfo.isOnline === true
+                    ).length,
+                    incomingRequests: incomingRequestsArray.length,
+                    outcomingRequests: outcomingRequestsArray.length,
                 },
                 friends: clearFriends
                     .sort(
@@ -97,7 +108,10 @@ export class FriendsService {
 
     async updateFriendStatus(userId: number, id: number) {
         if (userId == id) {
-            return 'error';
+            throw new HttpException(
+                'Requesting user and accepting user are the same person',
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
         console.log(userId, id);
         const candidate = await this.friendRepository.findOne({

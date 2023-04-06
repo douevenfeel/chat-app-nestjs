@@ -1,5 +1,5 @@
 import { OnlineInfo } from './online-info.model';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
@@ -12,7 +12,10 @@ export class OnlineInfoService {
         const date = Date.now();
         const onlineInfo = await this.getOnlineInfo(userId);
         if (onlineInfo) {
-            return 'error';
+            throw new HttpException(
+                'Online info of this user is already exists',
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
 
         return await this.onlineInfoRepository.create({
