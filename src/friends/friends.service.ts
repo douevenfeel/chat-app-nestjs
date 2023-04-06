@@ -61,40 +61,52 @@ export class FriendsService {
             // TODO сортировка по имени, потом сделать разные варианты, получая query параметр
             // TODO в дальнейшем прикрутить пагинацию
             console.log(clearFriends);
-            return clearFriends
-                .sort(
-                    (
-                        { firstName: firstNameA }: User,
-                        { firstName: firstNameB }: User
-                    ) => {
-                        if (firstNameA < firstNameB) {
-                            return -1;
+            // TODO заменить counts на нормальные данные, не замоканные
+            // TODO !!! ВЕЗДЕ заменить return 'error' на корректную ошибку
+            return {
+                counts: {
+                    friends: 1,
+                    onlineFriends: 1,
+                    incomingRequests: 1,
+                    outcomingRequests: 1,
+                },
+                friends: clearFriends
+                    .sort(
+                        (
+                            { firstName: firstNameA }: User,
+                            { firstName: firstNameB }: User
+                        ) => {
+                            if (firstNameA < firstNameB) {
+                                return -1;
+                            }
+                            if (firstNameA > firstNameB) {
+                                return 1;
+                            }
+                            return 0;
                         }
-                        if (firstNameA > firstNameB) {
-                            return 1;
-                        }
-                        return 0;
-                    }
-                )
-                .map((friend) => {
-                    // @ts-ignore
-                    friend.dataValues.friendStatus = friendStatus;
-                    return friend;
-                });
+                    )
+                    .map((friend) => {
+                        // @ts-ignore
+                        friend.dataValues.friendStatus = status;
+                        return friend;
+                    }),
+            };
         }
         return [];
     }
 
     async updateFriendStatus(userId: number, id: number) {
-        if (userId === id) {
+        if (userId == id) {
             return 'error';
         }
+        console.log(userId, id);
         const candidate = await this.friendRepository.findOne({
             where: {
                 from: [userId, id],
                 to: [userId, id],
             },
         });
+        console.log(candidate);
         if (!candidate) {
             await this.friendRepository.create({ from: userId, to: id });
             return { id, friendStatus: 'outcomingRequest' };

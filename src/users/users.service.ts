@@ -86,9 +86,14 @@ export class UsersService {
         });
         if (request) {
             const { id: userId } = request.user;
-            const status = await this.friendService.getFriendStatus(userId, id);
-            // @ts-ignore
-            user.dataValues.friendStatus = status;
+            if (id != userId) {
+                const status = await this.friendService.getFriendStatus(
+                    userId,
+                    id
+                );
+                // @ts-ignore
+                user.dataValues.friendStatus = status;
+            }
         }
 
         // @ts-ignore
