@@ -63,8 +63,23 @@ export class FriendsService {
             const clearFriends = await this.usersService.getUsersByIds(ids);
             // TODO в дальнейшем прикрутить пагинацию
             console.log(clearFriends);
+            const friendsToArray = await this.friendRepository.findAll({
+                where: {
+                    to: id,
+                    ...{ isRequested: true, isAccepted: true },
+                },
+            });
+            const friendsFromArray = await this.friendRepository.findAll({
+                where: {
+                    from: id,
+                    ...{ isRequested: true, isAccepted: true },
+                },
+            });
             const incomingRequestsArray = await this.friendRepository.findAll({
-                where: { to: id, ...{ isRequested: true, isAccepted: false } },
+                where: {
+                    to: id,
+                    ...{ isRequested: true, isAccepted: false },
+                },
             });
             const outcomingRequestsArray = await this.friendRepository.findAll({
                 where: {
@@ -74,7 +89,7 @@ export class FriendsService {
             });
             return {
                 counts: {
-                    friends: clearFriends.length,
+                    friends: friendsFromArray.length + friendsToArray.length,
                     onlineFriends: clearFriends.filter(
                         (friend) => friend.onlineInfo.isOnline === true
                     ).length,
