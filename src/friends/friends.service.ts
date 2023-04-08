@@ -5,6 +5,7 @@ import { UsersService } from '../users/users.service';
 import { User } from 'src/users/users.model';
 import { RequestUser } from 'src/auth/jwt-auth.guard';
 import { forwardRef } from '@nestjs/common/utils';
+import { OnlineInfo } from 'src/online-info/online-info.model';
 
 export type FriendStatus =
     | 'possibleFriend'
@@ -68,25 +69,43 @@ export class FriendsService {
             const friendsToArray = await this.friendRepository.findAll({
                 where: {
                     to: id,
-                    ...{ isRequested: true, isAccepted: true },
+                    isRequested: true,
+                    isAccepted: true,
                 },
+                include: [
+                    {
+                        model: User,
+                        as: 'fromUser',
+                        include: [{ model: OnlineInfo, as: 'onlineInfo' }],
+                    },
+                ],
             });
             const friendsFromArray = await this.friendRepository.findAll({
                 where: {
                     from: id,
-                    ...{ isRequested: true, isAccepted: true },
+                    isRequested: true,
+                    isAccepted: true,
                 },
+                include: [
+                    {
+                        model: User,
+                        as: 'toUser',
+                        include: [{ model: OnlineInfo, as: 'onlineInfo' }],
+                    },
+                ],
             });
             const incomingRequestsArray = await this.friendRepository.findAll({
                 where: {
                     to: id,
-                    ...{ isRequested: true, isAccepted: false },
+                    isRequested: true,
+                    isAccepted: false,
                 },
             });
             const outcomingRequestsArray = await this.friendRepository.findAll({
                 where: {
                     from: id,
-                    ...{ isRequested: true, isAccepted: false },
+                    isRequested: true,
+                    isAccepted: false,
                 },
             });
             if (q) {
@@ -101,12 +120,26 @@ export class FriendsService {
                     }
                 );
             }
+            if (section === 'online') {
+                clearFriends = clearFriends.filter(({ onlineInfo }) => {
+                    return Date.now() - +onlineInfo.lastSeen < 300000;
+                });
+            }
             return {
                 counts: {
                     friends: friendsFromArray.length + friendsToArray.length,
-                    onlineFriends: clearFriends.filter(
-                        (friend) => friend.onlineInfo.isOnline === true
-                    ).length,
+                    onlineFriends: [
+                        ...friendsFromArray.filter(
+                            ({ toUser }) =>
+                                Date.now() - +toUser.onlineInfo.lastSeen <
+                                300000
+                        ),
+                        ...friendsToArray.filter(
+                            ({ fromUser }) =>
+                                Date.now() - +fromUser.onlineInfo.lastSeen <
+                                300000
+                        ),
+                    ].length,
                     incomingRequests: incomingRequestsArray.length,
                     outcomingRequests: outcomingRequestsArray.length,
                 },
