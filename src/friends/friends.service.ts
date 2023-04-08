@@ -21,13 +21,12 @@ export class FriendsService {
     ) {}
 
     async getAllFriends(id: number, request: RequestUser) {
-        let query = {};
+        let query: { [key: string]: boolean } = {};
         const ids = [];
         const { status, q, section } = request.query;
         switch (status) {
             case 'outcomingRequest':
                 query = { isRequested: true, isAccepted: false };
-
                 break;
             case 'incomingRequest':
                 query = { isRequested: false, isAccepted: true };
@@ -47,7 +46,11 @@ export class FriendsService {
             where: { from: id, ...query },
         });
         const friendsTo = await this.friendRepository.findAll({
-            where: { to: id, ...query },
+            where: {
+                to: id,
+                isRequested: query.isAccepted,
+                isAccepted: query.isRequested,
+            },
         });
         friendsFrom &&
             friendsFrom.map((friend) => {
@@ -60,9 +63,8 @@ export class FriendsService {
                 return friend;
             });
         if (ids) {
-            const clearFriends = await this.usersService.getUsersByIds(ids);
+            let clearFriends = await this.usersService.getUsersByIds(ids);
             // TODO в дальнейшем прикрутить пагинацию
-            console.log(clearFriends);
             const friendsToArray = await this.friendRepository.findAll({
                 where: {
                     to: id,
@@ -87,6 +89,18 @@ export class FriendsService {
                     ...{ isRequested: true, isAccepted: false },
                 },
             });
+            if (q) {
+                clearFriends = clearFriends.filter(
+                    ({ firstName, lastName }) => {
+                        const fullName = `${firstName.toLowerCase()} ${lastName.toLowerCase()}`;
+                        const fullNameReverse = `${lastName.toLowerCase()} ${firstName.toLowerCase()}`;
+                        return (
+                            fullName.includes(String(q).toLowerCase()) ||
+                            fullNameReverse.includes(String(q).toLowerCase())
+                        );
+                    }
+                );
+            }
             return {
                 counts: {
                     friends: friendsFromArray.length + friendsToArray.length,
