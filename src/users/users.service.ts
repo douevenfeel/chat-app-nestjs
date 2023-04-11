@@ -64,6 +64,7 @@ export class UsersService {
         });
         if (request) {
             const { id: userId } = request.user;
+            await this.updateLastSeen(userId);
             if (id != userId) {
                 const status = await this.friendService.getFriendStatus(
                     userId,
@@ -82,6 +83,7 @@ export class UsersService {
 
     async updateProfileInfo(request: RequestUser, data: UpdateProfileInfoDto) {
         const { id } = request.user;
+        await this.updateLastSeen(id);
         const user = await this.userRepository.findOne({
             where: { id },
         });
@@ -104,5 +106,15 @@ export class UsersService {
         });
 
         return friends;
+    }
+
+    async updateLastSeen(id: number) {
+        const lastSeen = String(Date.now());
+        const user = await this.userRepository.update(
+            { lastSeen },
+            { where: { id } }
+        );
+
+        return user;
     }
 }

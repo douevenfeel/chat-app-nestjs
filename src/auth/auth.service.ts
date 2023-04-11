@@ -21,6 +21,7 @@ export class AuthService {
 
     async login(userDto: LoginUserDto, response: Response) {
         const user = await this.validateUser(userDto);
+        await this.userService.updateLastSeen(user.id);
         const accessToken = await this.generateToken(user, '1d');
         const refreshToken = await this.generateToken(user, '30d');
         response.cookie('refreshToken', refreshToken);
@@ -68,6 +69,7 @@ export class AuthService {
 
     async logout(request: RequestUser, response: Response) {
         const { id } = request.user;
+        await this.userService.updateLastSeen(id);
         response.clearCookie('refreshToken');
         return { OK: 1 };
     }
@@ -75,6 +77,7 @@ export class AuthService {
     async checkout(request: RequestUser, response: Response) {
         const { id } = request.user;
         const user = await this.userService.getUserById(id);
+        await this.userService.updateLastSeen(id);
         const accessToken = await this.generateToken(user, '1d');
         const refreshToken = await this.generateToken(user, '30d');
         response.cookie('refreshToken', refreshToken);

@@ -21,6 +21,8 @@ export class FriendsService {
     ) {}
 
     async getAllFriends(id: number, request: RequestUser) {
+        const { id: userId } = request.user;
+        await this.usersService.updateLastSeen(userId);
         let query: { [key: string]: boolean } = {};
         const ids = [];
         const { status, q, section } = request.query;
@@ -164,6 +166,7 @@ export class FriendsService {
     }
 
     async updateFriendStatus(userId: number, id: number) {
+        await this.usersService.updateLastSeen(userId);
         if (userId == id) {
             throw new HttpException(
                 'Requesting user and accepting user are the same person',
