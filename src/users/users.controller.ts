@@ -42,7 +42,6 @@ export class UsersController {
         @Req() request: RequestUser,
         @Body() data: UpdateProfileInfoDto
     ) {
-        console.log(data);
         return this.usersService.updateProfileInfo(request, data);
     }
 }

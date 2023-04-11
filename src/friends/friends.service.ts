@@ -5,7 +5,6 @@ import { UsersService } from '../users/users.service';
 import { User } from 'src/users/users.model';
 import { RequestUser } from 'src/auth/jwt-auth.guard';
 import { forwardRef } from '@nestjs/common/utils';
-import { OnlineInfo } from 'src/online-info/online-info.model';
 
 export type FriendStatus =
     | 'possibleFriend'
@@ -76,7 +75,6 @@ export class FriendsService {
                     {
                         model: User,
                         as: 'fromUser',
-                        include: [{ model: OnlineInfo, as: 'onlineInfo' }],
                     },
                 ],
             });
@@ -90,7 +88,6 @@ export class FriendsService {
                     {
                         model: User,
                         as: 'toUser',
-                        include: [{ model: OnlineInfo, as: 'onlineInfo' }],
                     },
                 ],
             });
@@ -121,8 +118,8 @@ export class FriendsService {
                 );
             }
             if (section === 'online') {
-                clearFriends = clearFriends.filter(({ onlineInfo }) => {
-                    return Date.now() - +onlineInfo.lastSeen < 300000;
+                clearFriends = clearFriends.filter(({ lastSeen }) => {
+                    return Date.now() - +lastSeen < 300000;
                 });
             }
             return {
@@ -131,13 +128,11 @@ export class FriendsService {
                     onlineFriends: [
                         ...friendsFromArray.filter(
                             ({ toUser }) =>
-                                Date.now() - +toUser.onlineInfo.lastSeen <
-                                300000
+                                Date.now() - +toUser.lastSeen < 300000
                         ),
                         ...friendsToArray.filter(
                             ({ fromUser }) =>
-                                Date.now() - +fromUser.onlineInfo.lastSeen <
-                                300000
+                                Date.now() - +fromUser.lastSeen < 300000
                         ),
                     ].length,
                     incomingRequests: incomingRequestsArray.length,
@@ -175,14 +170,12 @@ export class FriendsService {
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
-        console.log(userId, id);
         const candidate = await this.friendRepository.findOne({
             where: {
                 from: [userId, id],
                 to: [userId, id],
             },
         });
-        console.log(candidate);
         if (!candidate) {
             await this.friendRepository.create({ from: userId, to: id });
             return { id, friendStatus: 'outcomingRequest' };

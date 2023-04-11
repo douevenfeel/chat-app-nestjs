@@ -1,4 +1,3 @@
-import { OnlineInfo } from './online-info/online-info.model';
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UsersModule } from './users/users.module';
@@ -8,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { ConfirmCodeModule } from './confirm-code/confirm-code.module';
 import { EmailModule } from './email/email.module';
 import { FriendsModule } from './friends/friends.module';
-import { OnlineInfoModule } from './online-info/online-info.module';
 import { ConfirmCode } from './confirm-code/confirm-code.model';
 import { Friend } from './friends/friends.model';
 
@@ -25,7 +23,7 @@ import { Friend } from './friends/friends.model';
             username: process.env.POSTGRES_USER,
             password: process.env.POSTGRESS_PASSWORD,
             database: process.env.POSTGRES_DB,
-            models: [User, ConfirmCode, OnlineInfo, Friend],
+            models: [User, ConfirmCode, Friend],
             autoLoadModels: true,
         }),
         UsersModule,
@@ -33,7 +31,6 @@ import { Friend } from './friends/friends.model';
         ConfirmCodeModule,
         EmailModule,
         FriendsModule,
-        OnlineInfoModule,
     ],
 })
 export class AppModule {}

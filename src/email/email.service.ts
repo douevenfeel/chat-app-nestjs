@@ -10,7 +10,7 @@ export class EmailService {
     async sendUserConfirmation(email: string, confirmCode: string) {
         await this.mailerService.sendMail({
             to: email,
-            subject: 'Welcome to VK! Confirm your Email',
+            subject: 'Добро пожаловать в CHAT APP! Подтвердите почту',
             template: './confirmCode',
             context: {
                 confirmCode,
@@ -21,7 +21,7 @@ export class EmailService {
     async sendUserRegistration(user: RegistrationUserDto) {
         await this.mailerService.sendMail({
             to: user.email,
-            subject: 'Welcome to VK!',
+            subject: 'Добро пожаловать в CHAT APP!',
             template: './registration',
             context: {
                 firstName: user.firstName,

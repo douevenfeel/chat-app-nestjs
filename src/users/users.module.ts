@@ -1,4 +1,3 @@
-import { OnlineInfoModule } from './../online-info/online-info.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
@@ -14,7 +13,6 @@ import { FriendsModule } from 'src/friends/friends.module';
         SequelizeModule.forFeature([User]),
         forwardRef(() => AuthModule),
         forwardRef(() => FriendsModule),
-        OnlineInfoModule,
     ],
     exports: [UsersService],
 })

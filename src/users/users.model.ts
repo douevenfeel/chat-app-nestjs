@@ -1,12 +1,4 @@
-import { OnlineInfo } from './../online-info/online-info.model';
-import {
-    Column,
-    DataType,
-    HasMany,
-    HasOne,
-    Model,
-    Table,
-} from 'sequelize-typescript';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 import { ApiProperty } from '@nestjs/swagger';
 
 export type Avatar =
@@ -26,6 +18,7 @@ interface UserCreationAttrs {
     firstName: string;
     lastName: string;
     avatar: Avatar;
+    lastSeen: string;
 }
 
 @Table({ tableName: 'users' })
@@ -57,8 +50,19 @@ export class User extends Model<User, UserCreationAttrs> {
     @Column({ type: DataType.STRING })
     avatar: string;
 
-    @HasOne(() => OnlineInfo)
-    onlineInfo: OnlineInfo;
+    @ApiProperty({
+        example: '12345678',
+        description: 'Время последней активности',
+    })
+    @Column({
+        type: DataType.STRING,
+        allowNull: false,
+    })
+    lastSeen: string;
 
-    friendStatus: 1 | 2 | 3;
+    friendStatus:
+        | 'possibleFriend'
+        | 'outcomingRequest'
+        | 'incomingRequest'
+        | 'alreadyFriend';
 }
