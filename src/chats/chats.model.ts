@@ -10,7 +10,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../users/users.model';
 
 interface ChatCreationAttrs {
-    isPrivate: number;
+    isPrivate: boolean;
 }
 
 @Table({ tableName: 'chats' })
