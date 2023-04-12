@@ -4,11 +4,12 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { JwtModule } from '@nestjs/jwt';
 import { MessagesController } from './messages.controller';
 import { MessagesService } from './messages.service';
+import { Message } from './messages.model';
 
 @Module({
     controllers: [MessagesController],
     providers: [MessagesService],
-    imports: [],
+    imports: [SequelizeModule.forFeature([Message])],
     exports: [MessagesService],
 })
 export class MessagesModule {}

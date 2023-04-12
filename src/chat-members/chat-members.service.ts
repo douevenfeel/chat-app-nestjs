@@ -12,6 +12,7 @@ export class ChatMembersService {
     constructor(
         @InjectModel(ChatMembers)
         private chatMemberRepository: typeof ChatMembers,
+        @Inject(forwardRef(() => ChatsService))
         private chatService: ChatsService
     ) {}
 

@@ -9,6 +9,9 @@ import { EmailModule } from './email/email.module';
 import { FriendsModule } from './friends/friends.module';
 import { ConfirmCode } from './confirm-code/confirm-code.model';
 import { Friend } from './friends/friends.model';
+import { MessagesModule } from './messages/messages.module';
+import { ChatsModule } from './chats/chats.module';
+import { ChatMembersModule } from './chat-members/chat-members.module';
 
 @Module({
     providers: [],
@@ -31,6 +34,9 @@ import { Friend } from './friends/friends.model';
         ConfirmCodeModule,
         EmailModule,
         FriendsModule,
+        MessagesModule,
+        ChatsModule,
+        ChatMembersModule,
     ],
 })
 export class AppModule {}

@@ -11,6 +11,7 @@ import { ChatMembersService } from 'src/chat-members/chat-members.service';
 export class ChatsService {
     constructor(
         @InjectModel(Chat) private chatRepository: typeof Chat,
+        @Inject(forwardRef(() => ChatMembersService))
         private chatMembersService: ChatMembersService
     ) {}
 
