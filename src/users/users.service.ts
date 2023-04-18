@@ -101,7 +101,6 @@ export class UsersService {
 
     async getUsersByIds(ids: number[]) {
         const friends = await this.userRepository.findAll({
-            attributes: ['id', 'firstName', 'lastName', 'avatar'],
             where: { id: [...ids] },
         });
 

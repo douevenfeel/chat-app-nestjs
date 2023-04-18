@@ -124,6 +124,7 @@ export class FriendsService {
                     return Date.now() - +lastSeen < 300000;
                 });
             }
+            const user = await this.usersService.getUserById(id);
             return {
                 counts: {
                     friends: friendsFromArray.length + friendsToArray.length,
@@ -160,6 +161,7 @@ export class FriendsService {
                         friend.dataValues.friendStatus = status;
                         return friend;
                     }),
+                profile: user,
             };
         }
         return [];
