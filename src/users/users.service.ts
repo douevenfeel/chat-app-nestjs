@@ -116,4 +116,22 @@ export class UsersService {
 
         return user;
     }
+
+    async searchUsers(q: string) {
+        const users = await this.userRepository.findAll();
+        const clearUsers = users.filter(({ firstName, lastName }) => {
+            const fullName = `${firstName.toLowerCase()} ${lastName.toLowerCase()}`;
+            const fullNameReverse = `${lastName.toLowerCase()} ${firstName.toLowerCase()}`;
+            return (
+                fullName.includes(String(q).toLowerCase()) ||
+                fullNameReverse.includes(String(q).toLowerCase())
+            );
+        });
+        users.forEach((user) => {
+            // @ts-ignore
+            delete user.dataValues.password;
+            return user;
+        });
+        return { data: clearUsers, count: clearUsers.length };
+    }
 }
