@@ -25,14 +25,14 @@ export class ChatsService {
         return newChat;
     }
 
-    async findChatById(chatId: number) {
+    async getChatById(chatId: number) {
         const chat = await this.chatRepository.findOne({
             where: { id: chatId },
         });
         return chat;
     }
 
-    async findChat(userId: number, id: number) {
+    async getChat(userId: number, id: number) {
         await this.usersService.updateLastSeen(userId);
         if (userId == id) {
             throw new HttpException(
@@ -55,6 +55,55 @@ export class ChatsService {
                 chat.id
             );
             return { chatId: chat.id, messages, user: secondUser };
+        }
+    }
+
+    async getAllChats(userId: number) {
+        await this.usersService.updateLastSeen(userId);
+        const chatsReturn = [];
+
+        const chatsFirst = await this.chatRepository.findAll({
+            where: {
+                firstUserId: userId,
+            },
+        });
+        chatsFirst &&
+            chatsFirst.map(async (chat) => {
+                const chatReturn = await this.returnChat(userId, chat.id);
+                chatsReturn.push(chatReturn);
+                return chat;
+            });
+
+        const chatsSecond = await this.chatRepository.findAll({
+            where: {
+                secondUserId: userId,
+            },
+        });
+        chatsSecond &&
+            chatsSecond.map(async (chat) => {
+                const chatReturn = await this.returnChat(userId, chat.id);
+                chatsReturn.push(chatReturn);
+                return chat;
+            });
+
+        return chatsReturn;
+    }
+
+    async returnChat(userId: number, chatId: number) {
+        const chat = await this.chatRepository.findOne({
+            where: { id: chatId },
+        });
+        if (chat.firstUserId === userId) {
+            const secondUser = await this.usersService.getUserById(
+                chat.secondUserId
+            );
+            return { user: secondUser, chat };
+        }
+        if (chat.secondUserId === userId) {
+            const secondUser = await this.usersService.getUserById(
+                chat.firstUserId
+            );
+            return { user: secondUser, chat };
         }
     }
 }

@@ -16,12 +16,21 @@ import { ChatsService } from './chats.service';
 export class ChatsController {
     constructor(private chatsService: ChatsService) {}
 
-    @ApiOperation({ summary: 'поиск чата' })
+    @ApiOperation({ summary: 'вывод чата' })
     @ApiResponse({ status: 200 })
     @Get(':id')
     @UseGuards(JwtAuthGuard)
-    findChat(@Param('id') id: number, @Req() request: RequestUser) {
+    getChat(@Param('id') id: number, @Req() request: RequestUser) {
         const { id: userId } = request.user;
-        return this.chatsService.findChat(userId, +id);
+        return this.chatsService.getChat(userId, +id);
+    }
+
+    @ApiOperation({ summary: 'вывод чатов' })
+    @ApiResponse({ status: 200 })
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    getAllChats(@Req() request: RequestUser) {
+        const { id: userId } = request.user;
+        return this.chatsService.getAllChats(userId);
     }
 }

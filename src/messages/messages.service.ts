@@ -34,7 +34,7 @@ export class MessagesService {
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
-        const chat = await this.chatsService.findChat(userId, id);
+        const chat = await this.chatsService.getChat(userId, id);
 
         if (!chat.chatId) {
             const newChat = await this.chatsService.createNewChat(userId, id);
