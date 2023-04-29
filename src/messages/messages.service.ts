@@ -8,5 +8,16 @@ import { forwardRef } from '@nestjs/common/utils';
 
 @Injectable()
 export class MessagesService {
-    constructor() {}
+    constructor(
+        @InjectModel(Message) private messageRepository: typeof Message
+    ) {}
+
+    async findMessagesByChat(id: number) {
+        const messages = await this.messageRepository.findAll({
+            where: {
+                chatId: id,
+            },
+        });
+        return messages;
+    }
 }

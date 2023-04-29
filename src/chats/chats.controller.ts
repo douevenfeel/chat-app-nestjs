@@ -15,4 +15,13 @@ import { ChatsService } from './chats.service';
 @Controller('chats')
 export class ChatsController {
     constructor(private chatsService: ChatsService) {}
+
+    @ApiOperation({ summary: 'поиск чата' })
+    @ApiResponse({ status: 200 })
+    @Post(':id')
+    @UseGuards(JwtAuthGuard)
+    findChat(@Param('id') id: number, @Req() request: RequestUser) {
+        const { id: userId } = request.user;
+        return this.chatsService.findChat(userId, +id);
+    }
 }

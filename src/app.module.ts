@@ -11,7 +11,6 @@ import { ConfirmCode } from './confirm-code/confirm-code.model';
 import { Friend } from './friends/friends.model';
 import { MessagesModule } from './messages/messages.module';
 import { ChatsModule } from './chats/chats.module';
-import { ChatMembersModule } from './chat-members/chat-members.module';
 import { SearchModule } from './search/search.module';
 
 @Module({
@@ -37,7 +36,6 @@ import { SearchModule } from './search/search.module';
         FriendsModule,
         MessagesModule,
         ChatsModule,
-        ChatMembersModule,
         SearchModule,
     ],
 })

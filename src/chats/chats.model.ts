@@ -8,6 +8,7 @@ import {
 } from 'sequelize-typescript';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../users/users.model';
+import { Message } from 'src/messages/messages.model';
 
 interface ChatCreationAttrs {
     isPrivate: boolean;
@@ -25,14 +26,24 @@ export class Chat extends Model<Chat, ChatCreationAttrs> {
     id: number;
 
     @ApiProperty({
-        example: 'true',
-        description:
-            'Показывает, приватный ли чат (false если беседа на несколько человек)',
+        example: '1',
+        description: 'Уникальный идентификатор первого участника чата',
     })
-    @Column({ type: DataType.BOOLEAN })
-    isPrivate: boolean;
+    @ForeignKey(() => User)
+    @Column
+    firstUserId: number;
 
-    @ApiProperty({ example: 'Cool chat B)', description: 'Название чата' })
-    @Column({ type: DataType.STRING })
-    title: string;
+    @BelongsTo(() => User, 'firstUserId')
+    firstUser: User;
+
+    @ApiProperty({
+        example: '1',
+        description: 'Уникальный идентификатор второго участника чата',
+    })
+    @ForeignKey(() => User)
+    @Column
+    secondUserId: number;
+
+    @BelongsTo(() => User, 'secondUserId')
+    secondUser: User;
 }

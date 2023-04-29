@@ -52,8 +52,4 @@ export class Message extends Model<Message, MessageCreationAttrs> {
     @ApiProperty({ example: 'Hello world!', description: 'Текст сообщения' })
     @Column({ type: DataType.STRING })
     text: string;
-
-    @ApiProperty({ example: 'true!', description: 'Прочитано ли сообщение' })
-    @Column({ type: DataType.BOOLEAN })
-    isRead: boolean;
 }
