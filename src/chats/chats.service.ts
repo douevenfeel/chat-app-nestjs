@@ -17,26 +17,12 @@ export class ChatsService {
         private messagesService: MessagesService
     ) {}
 
-    async createPrivateChat(firstUser: number, secondUser: number) {
-        // const crossings = await this.chatMembersService.findSamePrivateChatOfUsers(
-        //     firstUser,
-        //     secondUser
-        // );
-        // if (crossings.length > 0) {
-        //     const newChat = await this.chatRepository.create({
-        //         isPrivate: true,
-        //     });
-        //     const newMemberFirst = await this.chatMembersService.createChatMember(
-        //         firstUser,
-        //         newChat.id
-        //     );
-        //     const newMemberSecond = await this.chatMembersService.createChatMember(
-        //         secondUser,
-        //         newChat.id
-        //     );
-        //     return 'created new chat';
-        // }
-        // return 'chat already exists';
+    async createNewChat(firstUserId: number, secondUserId: number) {
+        const newChat = await this.chatRepository.create({
+            firstUserId,
+            secondUserId,
+        });
+        return newChat;
     }
 
     async findChatById(chatId: number) {
@@ -60,18 +46,15 @@ export class ChatsService {
                 secondUserId: [userId, id],
             },
         });
+        const secondUser = await this.usersService.getUserById(id);
         if (!chat) {
-            const secondUser = await this.usersService.getUserById(id);
-            return { messages: [], user: secondUser };
+            return { chatId: null, messages: [], user: secondUser };
         }
         if (chat) {
             const messages = await this.messagesService.findMessagesByChat(
                 chat.id
             );
-            if (chat.firstUserId === id)
-                return { messages, user: chat.firstUser };
-            if (chat.secondUserId === id)
-                return { messages, user: chat.secondUser };
+            return { chatId: chat.id, messages, user: secondUser };
         }
     }
 }

@@ -18,7 +18,7 @@ export class ChatsController {
 
     @ApiOperation({ summary: 'поиск чата' })
     @ApiResponse({ status: 200 })
-    @Post(':id')
+    @Get(':id')
     @UseGuards(JwtAuthGuard)
     findChat(@Param('id') id: number, @Req() request: RequestUser) {
         const { id: userId } = request.user;

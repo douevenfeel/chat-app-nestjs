@@ -11,7 +11,8 @@ import { User } from '../users/users.model';
 import { Message } from 'src/messages/messages.model';
 
 interface ChatCreationAttrs {
-    isPrivate: boolean;
+    firstUserId: number;
+    secondUserId: number;
 }
 
 @Table({ tableName: 'chats' })

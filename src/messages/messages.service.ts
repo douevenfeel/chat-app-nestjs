@@ -5,11 +5,16 @@ import { UsersService } from '../users/users.service';
 import { User } from 'src/users/users.model';
 import { RequestUser } from 'src/auth/jwt-auth.guard';
 import { forwardRef } from '@nestjs/common/utils';
+import { ChatsService } from 'src/chats/chats.service';
 
 @Injectable()
 export class MessagesService {
     constructor(
-        @InjectModel(Message) private messageRepository: typeof Message
+        @InjectModel(Message) private messageRepository: typeof Message,
+        @Inject(forwardRef(() => UsersService))
+        private usersService: UsersService,
+        @Inject(forwardRef(() => ChatsService))
+        private chatsService: ChatsService
     ) {}
 
     async findMessagesByChat(id: number) {
@@ -19,5 +24,28 @@ export class MessagesService {
             },
         });
         return messages;
+    }
+
+    async createMessage(userId: number, id: number, text: string) {
+        await this.usersService.updateLastSeen(userId);
+        if (userId == id) {
+            throw new HttpException(
+                'Requesting user and accepting user are the same person',
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+        const chat = await this.chatsService.findChat(userId, id);
+
+        if (!chat.chatId) {
+            const newChat = await this.chatsService.createNewChat(userId, id);
+            chat.chatId = newChat.id;
+        }
+
+        const message = this.messageRepository.create({
+            userId,
+            chatId: chat.chatId,
+            text,
+        });
+        return message;
     }
 }

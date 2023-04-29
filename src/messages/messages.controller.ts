@@ -1,4 +1,5 @@
 import {
+    Body,
     Controller,
     Get,
     Param,
@@ -15,4 +16,17 @@ import { MessagesService } from './messages.service';
 @Controller('messages')
 export class MessagesController {
     constructor(private messageService: MessagesService) {}
+
+    @ApiOperation({ summary: 'отправка сообщения' })
+    @ApiResponse({ status: 200 })
+    @Post(':id')
+    @UseGuards(JwtAuthGuard)
+    findChat(
+        @Param('id') id: number,
+        @Req() request: RequestUser,
+        @Body() body: { text: string }
+    ) {
+        const { id: userId } = request.user;
+        return this.messageService.createMessage(userId, +id, body.text);
+    }
 }
