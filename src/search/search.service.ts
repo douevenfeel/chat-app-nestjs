@@ -43,11 +43,11 @@ export class SearchService {
             },
         };
         if (section === 'all') {
-            response.data.users = users.data.slice(0, 6);
-            response.data.posts = posts.data.slice(0, 6);
-            response.data.communities = communities.data.slice(0, 6);
-            response.data.musics = musics.data.slice(0, 6);
-            response.data.videos = videos.data.slice(0, 6);
+            response.data.users = users.data.slice(0, 3);
+            response.data.posts = posts.data.slice(0, 3);
+            response.data.communities = communities.data.slice(0, 3);
+            response.data.musics = musics.data.slice(0, 3);
+            response.data.videos = videos.data.slice(0, 3);
         } else {
             switch (section) {
                 case 'users':
