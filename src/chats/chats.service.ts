@@ -2,10 +2,9 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Chat } from './chats.model';
 import { UsersService } from '../users/users.service';
-import { User } from 'src/users/users.model';
-import { RequestUser } from 'src/auth/jwt-auth.guard';
 import { forwardRef } from '@nestjs/common/utils';
 import { MessagesService } from 'src/messages/messages.service';
+import { User } from 'src/users/users.model';
 
 @Injectable()
 export class ChatsService {
@@ -60,51 +59,51 @@ export class ChatsService {
 
     async getAllChats(userId: number) {
         await this.usersService.updateLastSeen(userId);
-        const chatsReturn = [];
-
         const chatsFirst = await this.chatRepository.findAll({
             where: {
                 firstUserId: userId,
             },
         });
-        chatsFirst &&
-            chatsFirst.map(async (chat) => {
-                const chatReturn = await this.returnChat(userId, chat.id);
-                chatsReturn.push(chatReturn);
-                return chat;
-            });
         const chatsSecond = await this.chatRepository.findAll({
             where: {
                 secondUserId: userId,
             },
         });
-        chatsSecond &&
-            chatsSecond.map(async (chat) => {
-                const chatReturn = await this.returnChat(userId, chat.id);
-                chatsReturn.push(chatReturn);
-                return chat;
-            });
+        const chats = [...chatsFirst, ...chatsSecond];
+        const response =
+            chats &&
+            chats.reduce(async (prev: any, chat: any) => {
+                const chatReturn = await this.returnChat(userId, chat);
+                prev.push(chatReturn);
+                return prev;
+            }, []);
 
-        return chatsReturn;
+        return response;
     }
 
-    async returnChat(userId: number, chatId: number) {
-        const chat = await this.chatRepository.findOne({
-            where: { id: chatId },
-        });
+    async returnChat(
+        userId: number,
+        chat: Chat
+    ): Promise<
+        Pick<
+            User,
+            'id' | 'email' | 'firstName' | 'lastName' | 'lastSeen' | 'avatar'
+        >
+    > {
+        let id;
         if (chat.firstUserId === userId) {
-            const secondUser = await this.usersService.getUserById(
-                chat.secondUserId
-            );
-            // TODO поменять, чтобы возвращался только user - {...secondUser}
-            return { user: secondUser, id: chat.id };
+            id = chat.secondUserId;
+        } else {
+            id = chat.firstUserId;
         }
-        if (chat.secondUserId === userId) {
-            const secondUser = await this.usersService.getUserById(
-                chat.firstUserId
-            );
-            // TODO поменять, чтобы возвращался только user - {...secondUser}
-            return { user: secondUser, id: chat.id };
-        }
+        const secondUser = await this.usersService.getUserById(id);
+        return {
+            id: secondUser.id,
+            email: secondUser.email,
+            firstName: secondUser.firstName,
+            lastName: secondUser.lastName,
+            lastSeen: secondUser.lastSeen,
+            avatar: secondUser.avatar,
+        };
     }
 }
