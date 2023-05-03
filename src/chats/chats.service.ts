@@ -70,14 +70,13 @@ export class ChatsService {
             },
         });
         const chats = [...chatsFirst, ...chatsSecond];
-        const response =
-            chats &&
-            chats.reduce(async (prev: any, chat: any) => {
-                const chatReturn = await this.returnChat(userId, chat);
-                prev.push(chatReturn);
-                return prev;
-            }, []);
-
+        const response = [];
+        if (chats) {
+            for (let i = 0; i < chats.length; i++) {
+                const res = await this.returnChat(userId, chats[i]);
+                response.push(res);
+            }
+        }
         return response;
     }
 
