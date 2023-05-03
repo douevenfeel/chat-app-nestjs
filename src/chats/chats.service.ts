@@ -73,7 +73,6 @@ export class ChatsService {
                 chatsReturn.push(chatReturn);
                 return chat;
             });
-
         const chatsSecond = await this.chatRepository.findAll({
             where: {
                 secondUserId: userId,
@@ -97,13 +96,15 @@ export class ChatsService {
             const secondUser = await this.usersService.getUserById(
                 chat.secondUserId
             );
-            return { user: secondUser, chat };
+            // TODO поменять, чтобы возвращался только user - {...secondUser}
+            return { user: secondUser, id: chat.id };
         }
         if (chat.secondUserId === userId) {
             const secondUser = await this.usersService.getUserById(
                 chat.firstUserId
             );
-            return { user: secondUser, chat };
+            // TODO поменять, чтобы возвращался только user - {...secondUser}
+            return { user: secondUser, id: chat.id };
         }
     }
 }
