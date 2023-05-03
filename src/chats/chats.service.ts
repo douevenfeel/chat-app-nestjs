@@ -47,13 +47,13 @@ export class ChatsService {
         });
         const secondUser = await this.usersService.getUserById(id);
         if (!chat) {
-            return { chatId: null, messages: [], user: secondUser };
+            return { id: null, messages: [], user: secondUser };
         }
         if (chat) {
             const messages = await this.messagesService.findMessagesByChat(
                 chat.id
             );
-            return { chatId: chat.id, messages, user: secondUser };
+            return { id: chat.id, messages, user: secondUser };
         }
     }
 

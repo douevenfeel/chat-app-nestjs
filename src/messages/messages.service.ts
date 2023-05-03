@@ -22,6 +22,18 @@ export class MessagesService {
             where: {
                 chatId: id,
             },
+            attributes: ['id', 'text'],
+            include: {
+                model: User,
+                attributes: [
+                    'id',
+                    'email',
+                    'firstName',
+                    'lastName',
+                    'avatar',
+                    'lastSeen',
+                ],
+            },
         });
         return messages;
     }
@@ -36,14 +48,14 @@ export class MessagesService {
         }
         const chat = await this.chatsService.getChat(userId, id);
 
-        if (!chat.chatId) {
+        if (!chat.id) {
             const newChat = await this.chatsService.createNewChat(userId, id);
-            chat.chatId = newChat.id;
+            chat.id = newChat.id;
         }
 
         const message = this.messageRepository.create({
             userId,
-            chatId: chat.chatId,
+            chatId: chat.id,
             text,
         });
         return message;
