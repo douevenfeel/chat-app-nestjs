@@ -22,7 +22,7 @@ export class MessagesService {
             where: {
                 chatId: id,
             },
-            attributes: ['id', 'text'],
+            attributes: ['id', 'text', 'createdAt'],
             include: {
                 model: User,
                 attributes: [
@@ -53,11 +53,25 @@ export class MessagesService {
             chat.id = newChat.id;
         }
 
-        const message = this.messageRepository.create({
+        const message = await this.messageRepository.create({
             userId,
             chatId: chat.id,
-            text,
+            text: text.trim(),
         });
-        return message;
+        const response = await this.messageRepository.findOne({
+            where: { id: message.id },
+            include: {
+                model: User,
+                attributes: [
+                    'id',
+                    'email',
+                    'firstName',
+                    'lastName',
+                    'avatar',
+                    'lastSeen',
+                ],
+            },
+        });
+        return response;
     }
 }

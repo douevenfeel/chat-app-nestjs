@@ -50,6 +50,6 @@ export class Message extends Model<Message, MessageCreationAttrs> {
     chat: Chat;
 
     @ApiProperty({ example: 'Hello world!', description: 'Текст сообщения' })
-    @Column({ type: DataType.STRING })
+    @Column({ type: DataType.TEXT })
     text: string;
 }
