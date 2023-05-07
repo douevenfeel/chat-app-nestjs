@@ -5,6 +5,7 @@ import { UsersService } from '../users/users.service';
 import { forwardRef } from '@nestjs/common/utils';
 import { MessagesService } from 'src/messages/messages.service';
 import { User } from 'src/users/users.model';
+import { Message } from 'src/messages/messages.model';
 
 @Injectable()
 export class ChatsService {
@@ -31,6 +32,13 @@ export class ChatsService {
         return chat;
     }
 
+    async updateMessageId(chatId: number, messageId: number) {
+        const chat = await this.getChatById(chatId);
+        chat.messageId = messageId;
+        chat.save();
+        return chat;
+    }
+
     async getChat(userId: number, id: number) {
         await this.usersService.updateLastSeen(userId);
         if (userId == id) {
@@ -50,10 +58,13 @@ export class ChatsService {
             return { id: null, messages: [], user: secondUser };
         }
         if (chat) {
+            const message = await this.messagesService.findMessage(
+                chat.messageId
+            );
             const messages = await this.messagesService.findMessagesByChat(
                 chat.id
             );
-            return { id: chat.id, messages, user: secondUser };
+            return { id: chat.id, messages, user: secondUser, message };
         }
     }
 
@@ -73,11 +84,16 @@ export class ChatsService {
         const response = [];
         if (chats) {
             for (let i = 0; i < chats.length; i++) {
-                const res = await this.returnChat(userId, chats[i]);
-                response.push(res);
+                const user = await this.returnChat(userId, chats[i]);
+                const message = await this.messagesService.findMessage(
+                    chats[i].messageId
+                );
+                response.push({ user, message });
             }
         }
-        return response;
+        return response.sort(
+            (chatA, chatB) => chatB.message.createdAt - chatA.message.createdAt
+        );
     }
 
     async returnChat(

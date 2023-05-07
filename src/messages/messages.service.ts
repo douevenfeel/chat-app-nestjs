@@ -58,6 +58,7 @@ export class MessagesService {
             chatId: chat.id,
             text: text.trim(),
         });
+        await this.chatsService.updateMessageId(chat.id, message.id);
         const response = await this.messageRepository.findOne({
             where: { id: message.id },
             include: {
@@ -73,5 +74,9 @@ export class MessagesService {
             },
         });
         return response;
+    }
+
+    async findMessage(id: number) {
+        return await this.messageRepository.findOne({ where: { id } });
     }
 }

@@ -30,7 +30,7 @@ export class Friend extends Model<Friend, FriendCreationAttrs> {
         description: 'Уникальный идентификатор от кого заявка',
     })
     @ForeignKey(() => User)
-    @Column
+    @Column({ type: DataType.INTEGER, allowNull: false })
     from: number;
 
     @BelongsTo(() => User, 'from')
@@ -41,7 +41,7 @@ export class Friend extends Model<Friend, FriendCreationAttrs> {
         description: 'Уникальный идентификатор кому заявка',
     })
     @ForeignKey(() => User)
-    @Column
+    @Column({ type: DataType.INTEGER, allowNull: false })
     to: number;
 
     @BelongsTo(() => User, 'to')

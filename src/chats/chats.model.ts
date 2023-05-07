@@ -31,7 +31,10 @@ export class Chat extends Model<Chat, ChatCreationAttrs> {
         description: 'Уникальный идентификатор первого участника чата',
     })
     @ForeignKey(() => User)
-    @Column
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false,
+    })
     firstUserId: number;
 
     @BelongsTo(() => User, 'firstUserId')
@@ -42,9 +45,17 @@ export class Chat extends Model<Chat, ChatCreationAttrs> {
         description: 'Уникальный идентификатор второго участника чата',
     })
     @ForeignKey(() => User)
-    @Column
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false,
+    })
     secondUserId: number;
 
     @BelongsTo(() => User, 'secondUserId')
     secondUser: User;
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: true,
+    })
+    messageId: number;
 }

@@ -39,15 +39,15 @@ export class User extends Model<User, UserCreationAttrs> {
     password: string;
 
     @ApiProperty({ example: 'Ivanov', description: 'Фамилия' })
-    @Column({ type: DataType.STRING, defaultValue: false })
+    @Column({ type: DataType.STRING, defaultValue: false, allowNull: false })
     lastName: string;
 
     @ApiProperty({ example: 'Ivan', description: 'Имя' })
-    @Column({ type: DataType.STRING, defaultValue: false })
+    @Column({ type: DataType.STRING, defaultValue: false, allowNull: false })
     firstName: string;
 
     @ApiProperty({ example: 'pink', description: 'Цвет аватара' })
-    @Column({ type: DataType.STRING })
+    @Column({ type: DataType.STRING, allowNull: false })
     avatar: string;
 
     @ApiProperty({
