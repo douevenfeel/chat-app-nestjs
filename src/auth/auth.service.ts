@@ -40,9 +40,8 @@ export class AuthService {
                 HttpStatus.BAD_REQUEST
             );
         }
-        const {
-            confirmed,
-        } = await this.confirmCodeService.getConfirmCodeByEmail(userDto.email);
+        const { confirmed } =
+            await this.confirmCodeService.getConfirmCodeByEmail(userDto.email);
         if (!confirmed) {
             throw new HttpException(
                 'Код не подтвержден',
